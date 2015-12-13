@@ -1,0 +1,70 @@
+{
+	"applications": [
+		{
+			"id": 1,
+			"name": "INT001",
+			"description": "Folder used for integration files on INT001."
+		}
+	],
+	"categories": [
+		{
+			"id": 1,
+			"name": "In Folder",
+			"description": ""
+		},
+		{
+			"id": 2,
+			"name": "Out Folder",
+			"description": ""
+		},
+		{
+			"id": 3,
+			"name": "Shared Folder",
+			"description": ""
+		}
+	],
+	"paths": [
+		{
+			"applicationId": 1,
+			"categoryId": 3,
+			"name": "Temp Folder",
+			"path": "C:\\temp\\",
+			"description": "Temp Folder",
+			"includeChildFolders": false,
+			"warningTimeInterval": "0.00:01:00",
+			"errorTimeInterval": "0.00:02:00",
+			"returnAllFileNames": true,
+			"excludeChildFoldersList": [],
+			"timeEvaluationProperty": "ctime",
+			"filter": "setup"
+		},
+		{
+			"applicationId": 1,
+			"categoryId": 3,
+			"name": "Test Folder",
+			"path": "C:\\temp\\test",
+			"description": "Test Folder",
+			"includeChildFolders": true,
+			"warningTimeInterval": "0.00:00:10",
+			"errorTimeInterval": "0.00:00:20",
+			"returnAllFileNames": false,
+			"excludeChildFoldersList": [],
+			"timeEvaluationProperty": "ctime",
+			"filter": ""
+		},
+		{
+			"applicationId": 1,
+			"categoryId": 3,
+			"name": "Drivers Folder",
+			"path": "C:\\drivers\\",
+			"description": "Drivers Folder",
+			"includeChildFolders": true,
+			"warningTimeInterval": "0.00:01:00",
+			"errorTimeInterval": "0.00:02:00",
+			"returnAllFileNames": false,
+			"excludeChildFoldersList": [],
+			"timeEvaluationProperty": "ctime",
+			"filter": ""
+		}
+	]
+}
