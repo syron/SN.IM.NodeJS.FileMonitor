@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"out": "filemonitor.js",
+		"target": "ES5",
+		"watch": true
+	},
+	"files": [
+		"filemonitor.ts"
+	],
+	"exclude": [
+		"/models"
+	]
+}
