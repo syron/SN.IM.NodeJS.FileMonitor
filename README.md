@@ -6,15 +6,15 @@ File Monitor for Integration Manager based on NodeJS
 ```
 /actions
 ```
-
+Gets a list of all available actions the monitor agent has.
 ```
 /source
 ```
-
+Gets the information needed by Integration Manager used to monitor the different folders specified in the configuration file.
 ```
 /isalive
 ```
-
+Simply returns true.
 
 ## Build
 To build the file monitor solution run the following command in your command prompt.
