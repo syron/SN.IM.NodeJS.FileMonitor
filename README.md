@@ -25,6 +25,14 @@ tsc filemonitor.ts -out filemonitor.js -removeComments
 
 ## How-To
 
+### Actions / Remote Control
+
+#### FilesDetailsOldest
+Lists the 30 oldest files within the selected resource (folder).
+
+#### FilesDetailsNewest
+Lists the 30 newest files within the selected resource (folder).
+
 ### Start
 
 #### Without configuration file as parameter
