@@ -1,6 +1,21 @@
 # SN.IM.NodeJS.FileMonitor
 File Monitor for Integration Manager based on NodeJS
 
+## API Calls
+
+```
+/actions
+```
+
+```
+/source
+```
+
+```
+/isalive
+```
+
+
 ## Build
 To build the file monitor solution run the following command in your command prompt.
 
