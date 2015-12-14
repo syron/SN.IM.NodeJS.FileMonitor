@@ -7,3 +7,15 @@ To build the file monitor solution run the following command in your command pro
 ```
 tsc filemonitor.ts -out filemonitor.js -removeComments
 ```
+
+## How-To
+
+### Default
+```
+node filemonitor.js
+```
+
+### Configuration file parameter
+```
+node filemonitor.js -c customConfigurationFile.json
+```
