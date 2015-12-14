@@ -81,10 +81,10 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
 	var collection: Collection = new Collection();
 	collection.Version = "1.0.0.0";
 	
-	
 	var fullUrl= req.protocol + '://' + req.hostname  + ':'+PORT + req.path;
 	collection.Href = fullUrl;
 	
+	// oldest files action
 	var oldestFilesItem: Item = new Item();
 	oldestFilesItem.Href = "";
 	oldestFilesItem.Links = null;
@@ -102,7 +102,28 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
 	
 	oldestFilesItem.Data = oldestFilesAction;
 	
-	collection.Items.push(oldestFilesItem);	
+	collection.Items.push(oldestFilesItem);
+	
+	// newest files action
+	var oldestFilesItem: Item = new Item();
+	oldestFilesItem.Href = "";
+	oldestFilesItem.Links = null;
+	
+	var oldestFilesAction: Action = new Action();
+	oldestFilesAction.ActionId = "12000093-716f-4545-ab09-0fca87d61eb9";
+	oldestFilesAction.Name = "FilesDetailsNewest";
+	oldestFilesAction.DisplayName = "Details (30 newest)";
+	oldestFilesAction.Description = "Shows a list of the 30 newest files.";
+	oldestFilesAction.Method = "GET";
+	
+	oldestFilesAction.Fields.push(new Field("resourceName", "Name of the resource", "string"));
+	oldestFilesAction.Fields.push(new Field("categoryName", "Name of the category", "string"));
+	oldestFilesAction.Fields.push(new Field("applicationName", "Name of the application", "string"));
+	
+	oldestFilesItem.Data = oldestFilesAction;
+	
+	collection.Items.push(oldestFilesItem);
+		
 	
 	apiresult.Collection = collection;
 	
