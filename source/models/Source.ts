@@ -3,15 +3,15 @@
 /// <reference path="Resource.ts" />
 
 class Source {
-	public Name:string;
-	public Description:string;
+	public Server:string;
+	public Environment:string;
+	public Version:string;
+	
 	public Applications:Array<Application>;
 	public Categories:Array<Category>;
 	public Resources:Array<Resource>;
 	
-	constructor(name:  string, description: string) {
-		this.Name = name;
-		this.Description = description;
+	constructor() {
 		this.Applications = new Array<Application>();
 		this.Resources = new Array<Resource>();
 		this.Categories = new Array<Category>();

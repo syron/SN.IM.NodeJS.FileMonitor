@@ -1,70 +1,47 @@
 {
-	"applications": [
+	"Settings": {
+		"Server": "",
+		"Environment": "Dev",
+		"Version": "1.0.0.0"	
+	},
+	"Applications": [
 		{
-			"id": 1,
-			"name": "INT001",
-			"description": "Folder used for integration files on INT001."
+			"ApplicationId": 1,
+			"Name": "INT001",
+			"Description": "Folder used for integration files on INT001."
 		}
 	],
-	"categories": [
+	"Categories": [
 		{
-			"id": 1,
-			"name": "In Folder",
-			"description": ""
+			"CategoryId": 1,
+			"Name": "In Folder",
+			"Description": ""
 		},
 		{
-			"id": 2,
-			"name": "Out Folder",
-			"description": ""
+			"CategoryId": 2,
+			"Name": "Out Folder",
+			"Description": ""
 		},
 		{
-			"id": 3,
-			"name": "Shared Folder",
-			"description": ""
+			"CategoryId": 3,
+			"Name": "Shared Folder",
+			"Description": ""
 		}
 	],
-	"paths": [
+	"Paths": [
 		{
-			"applicationId": 1,
-			"categoryId": 3,
-			"name": "Temp Folder",
-			"path": "C:\\temp\\",
-			"description": "Temp Folder",
-			"includeChildFolders": false,
-			"warningTimeInterval": "0.00:01:00",
-			"errorTimeInterval": "0.00:02:00",
-			"returnAllFileNames": true,
-			"excludeChildFoldersList": [],
-			"timeEvaluationProperty": "ctime",
-			"filter": "setup"
-		},
-		{
-			"applicationId": 1,
-			"categoryId": 3,
-			"name": "Test Folder",
-			"path": "C:\\temp\\test",
-			"description": "Test Folder",
-			"includeChildFolders": true,
-			"warningTimeInterval": "0.00:00:10",
-			"errorTimeInterval": "0.00:00:20",
-			"returnAllFileNames": false,
-			"excludeChildFoldersList": [],
-			"timeEvaluationProperty": "ctime",
-			"filter": ""
-		},
-		{
-			"applicationId": 1,
-			"categoryId": 3,
-			"name": "Drivers Folder",
-			"path": "C:\\drivers\\",
-			"description": "Drivers Folder",
-			"includeChildFolders": true,
-			"warningTimeInterval": "0.00:01:00",
-			"errorTimeInterval": "0.00:02:00",
-			"returnAllFileNames": false,
-			"excludeChildFoldersList": [],
-			"timeEvaluationProperty": "ctime",
-			"filter": ""
+			"ApplicationId": 1,
+			"CategoryId": 3,
+			"Name": "Temp Folder",
+			"Path": "C:\\temp\\",
+			"Description": "Temp Folder",
+			"IncludeChildFolders": false,
+			"WarningTimeInterval": "0.00:01:00",
+			"ErrorTimeInterval": "0.00:02:00",
+			"ReturnAllFileNames": true,
+			"ExcludeChildFoldersList": [],
+			"TimeEvaluationProperty": "ctime",
+			"Filter": "setup"
 		}
 	]
 }
