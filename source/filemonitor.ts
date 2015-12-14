@@ -8,6 +8,11 @@
 /// <reference path="models/Category.ts" />
 /// <reference path="models/Source.ts" />
 /// <reference path="models/Resource.ts" />
+/// <reference path="models/Collection.ts" />
+/// <reference path="models/Field.ts" />
+/// <reference path="models/Action.ts" />
+/// <reference path="models/item.ts" />
+/// <reference path="models/ApiResult.ts" />
 
 declare var process:any;
 declare function require(name:string);
@@ -67,6 +72,44 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/isalive', function (req, res) {
 	res.send("true");
 });
 
+app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
+	
+	res.type("application/json");
+	
+	var apiresult: ApiResult = new ApiResult();
+	
+	var collection: Collection = new Collection();
+	collection.Version = "1.0.0.0";
+	
+	
+	var fullUrl= req.protocol + '://' + req.hostname  + ':'+PORT + req.path;
+	collection.Href = fullUrl;
+	
+	var oldestFilesItem: Item = new Item();
+	oldestFilesItem.Href = "";
+	oldestFilesItem.Links = null;
+	
+	var oldestFilesAction: Action = new Action();
+	oldestFilesAction.ActionId = "12012393-716f-4545-ab09-0fca87d61eb9";
+	oldestFilesAction.Name = "FilesDetailsOldest";
+	oldestFilesAction.DisplayName = "Details (30 oldest)";
+	oldestFilesAction.Description = "Shows a list of the 30 oldest files.";
+	oldestFilesAction.Method = "GET";
+	
+	oldestFilesAction.Fields.push(new Field("resourceName", "Name of the resource", "string"));
+	oldestFilesAction.Fields.push(new Field("categoryName", "Name of the category", "string"));
+	oldestFilesAction.Fields.push(new Field("applicationName", "Name of the application", "string"));
+	
+	oldestFilesItem.Data = oldestFilesAction;
+	
+	collection.Items.push(oldestFilesItem);	
+	
+	apiresult.Collection = collection;
+	
+	res.send(apiresult);
+	
+});
+
 app.get('/IM/Monitor/Agent/NodeJS/Files/source', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	
@@ -99,7 +142,7 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/source', function(req, res) {
 			, new TimeSpan(<string>path.WarningTimeInterval)
 			, new TimeSpan(<string>path.ErrorTimeInterval)
 			, StatusCode[<string>path.TimeEvaluationProperty]
-			, Boolean(<string>path.ReturnAllFileNames)
+			, Boolean(<string>path.IncludeChildFolders)
 			, path.ExcludeChildFoldersList
 			, path.Filter);
 		

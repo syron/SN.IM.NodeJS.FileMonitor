@@ -107,6 +107,44 @@ var Source = (function () {
     }
     return Source;
 })();
+var Item = (function () {
+    function Item() {
+        this.Href = null;
+        this.Links = null;
+    }
+    return Item;
+})();
+var Collection = (function () {
+    function Collection() {
+        this.Items = new Array();
+        this.Links = null;
+        this.Queries = null;
+        this.Template = null;
+        this.Pagination = null;
+        this.Error = null;
+    }
+    return Collection;
+})();
+var Field = (function () {
+    function Field(name, description, type) {
+        this.Name = name;
+        this.Description = description;
+        this.Type = type;
+    }
+    return Field;
+})();
+var Action = (function () {
+    function Action() {
+        this.Fields = new Array();
+    }
+    return Action;
+})();
+var ApiResult = (function () {
+    function ApiResult() {
+        this.Collection = null;
+    }
+    return ApiResult;
+})();
 var DEFAULTCONFIGFILE = "config.json";
 var DEBUG = true;
 var PORT = 8080;
@@ -149,6 +187,30 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/isalive', function (req, res) {
     res.type("application/json");
     res.send("true");
 });
+app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
+    res.type("application/json");
+    var apiresult = new ApiResult();
+    var collection = new Collection();
+    collection.Version = "1.0.0.0";
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
+    collection.Href = fullUrl;
+    var oldestFilesItem = new Item();
+    oldestFilesItem.Href = "";
+    oldestFilesItem.Links = null;
+    var oldestFilesAction = new Action();
+    oldestFilesAction.ActionId = "12012393-716f-4545-ab09-0fca87d61eb9";
+    oldestFilesAction.Name = "FilesDetailsOldest";
+    oldestFilesAction.DisplayName = "Details (30 oldest)";
+    oldestFilesAction.Description = "Shows a list of the 30 oldest files.";
+    oldestFilesAction.Method = "GET";
+    oldestFilesAction.Fields.push(new Field("resourceName", "Name of the resource", "string"));
+    oldestFilesAction.Fields.push(new Field("categoryName", "Name of the category", "string"));
+    oldestFilesAction.Fields.push(new Field("applicationName", "Name of the application", "string"));
+    oldestFilesItem.Data = oldestFilesAction;
+    collection.Items.push(oldestFilesItem);
+    apiresult.Collection = collection;
+    res.send(apiresult);
+});
 app.get('/IM/Monitor/Agent/NodeJS/Files/source', function (req, res) {
     res.setHeader('Content-Type', 'application/json');
     loadConfiguration();
@@ -168,7 +230,7 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/source', function (req, res) {
         resource.Description = path.Description;
         resource.StatusCode = StatusCode.OK;
         resource.ErrorCode = 0;
-        var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.ReturnAllFileNames), path.ExcludeChildFoldersList, path.Filter);
+        var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
         files.forEach(function (file) {
             if (resource.StatusCode < StatusCode.Error && file.Status == StatusCode.Error) {
                 resource.StatusCode = StatusCode.Error;
