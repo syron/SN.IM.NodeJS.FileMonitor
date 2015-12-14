@@ -1,4 +1,6 @@
 /// <reference path="Item.ts" />
+/// <reference path="Template.ts" />
+
 
 class Collection {
 	public Version: string;
@@ -6,7 +8,7 @@ class Collection {
 	public Items: Array<Item>;
 	public Links: any;
 	public Queries: any;
-	public Template: any;
+	public Template: Template;
 	public Pagination: any;
 	public Error: any;
 	

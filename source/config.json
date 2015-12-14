@@ -35,7 +35,7 @@
 			"Name": "Temp Folder",
 			"Path": "C:\\temp\\",
 			"Description": "Temp Folder",
-			"IncludeChildFolders": false,
+			"IncludeChildFolders": true,
 			"WarningTimeInterval": "0.00:01:00",
 			"ErrorTimeInterval": "0.00:02:00",
 			"ReturnAllFileNames": true,

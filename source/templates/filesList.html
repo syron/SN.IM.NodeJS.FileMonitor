@@ -1,0 +1,23 @@
+{{#.}}
+<h3>Outdated Files</h3>
+<p>List of outdated files (restricted to max 30 rows).</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>File Name</th>
+            <th>Full Path</th>
+            <th>Time</th>
+            <th>State</th></tr>
+    </thead>
+    <tbody>
+        {{#Files}}
+        <tr>
+            <td>{{Name}}</td>
+            <td>{{FullPath}}</td>
+            <td>{{Time}}</td>     
+            <td>{{Status}}</td>   
+        </tr>
+        {{/Files}}
+    </tbody>
+</table>
+{{/.}}

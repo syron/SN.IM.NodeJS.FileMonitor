@@ -114,6 +114,12 @@ var Item = (function () {
     }
     return Item;
 })();
+var Template = (function () {
+    function Template() {
+        this.data = new Array();
+    }
+    return Template;
+})();
 var Collection = (function () {
     function Collection() {
         this.Items = new Array();
@@ -145,6 +151,12 @@ var ApiResult = (function () {
     }
     return ApiResult;
 })();
+var FilesDetails = (function () {
+    function FilesDetails() {
+        this.Files = new Array();
+    }
+    return FilesDetails;
+})();
 var DEFAULTCONFIGFILE = "config.json";
 var DEBUG = true;
 var PORT = 8080;
@@ -153,6 +165,7 @@ var fs = require("fs");
 var os = require("os");
 var argv = require("minimist")(process.argv.slice(2));
 var app = express();
+var router = express.Router();
 var configFile;
 var config;
 if (typeof argv.c == "string") {
@@ -171,23 +184,44 @@ catch (ex) {
     console.log("Example: node filemonitor.js -config " + configFile);
     process.exit();
 }
-var loadConfiguration = function () {
+var loadFileContent = function (file) {
     try {
-        config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+        return fs.readFileSync(file, 'utf8');
     }
     catch (ex) {
         console.log("Error loading configuration file '" + configFile + "'.");
         process.exit();
     }
 };
+var loadConfiguration = function () {
+    try {
+        config = JSON.parse(loadFileContent(configFile));
+    }
+    catch (ex) {
+        console.log("Error loading configuration file '" + configFile + "'.");
+        process.exit();
+    }
+};
+function compareFileInfoAsc(a, b) {
+    if (a.Time < b.Time)
+        return -1;
+    if (a.Time > b.Time)
+        return 1;
+    return 0;
+}
+function compareFileInfoDesc(a, b) {
+    if (a.Time < b.Time)
+        return 1;
+    if (a.Time > b.Time)
+        return -1;
+    return 0;
+}
 var monitor = new FileMonitor();
-app.get('/IM/Monitor/Agent/NodeJS/Files/', function (req, res) {
-});
-app.get('/IM/Monitor/Agent/NodeJS/Files/isalive', function (req, res) {
+router.get('/isalive', function (req, res) {
     res.type("application/json");
     res.send("true");
 });
-app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
+router.get('/actions', function (req, res) {
     res.type("application/json");
     var apiresult = new ApiResult();
     var collection = new Collection();
@@ -225,8 +259,116 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
     apiresult.Collection = collection;
     res.send(apiresult);
 });
-app.get('/IM/Monitor/Agent/NodeJS/Files/source', function (req, res) {
-    res.setHeader('Content-Type', 'application/json');
+router.get('/FilesDetailsOldest', function (req, res) {
+    res.type("application/json");
+    var resourceName = req.query.resourceName;
+    var categoryName = req.query.categoryName;
+    var applicationName = req.query.applicationName;
+    loadConfiguration();
+    var applicationId;
+    config.Applications.forEach(function (application) {
+        if (application.Name == applicationName) {
+            applicationId = application.ApplicationId;
+            return;
+        }
+    });
+    console.log("Application Id: " + applicationId);
+    var categoryId;
+    config.Categories.forEach(function (category) {
+        if (category.Name == categoryName) {
+            categoryId = category.CategoryId;
+            return;
+        }
+    });
+    console.log("Category Id: " + categoryId);
+    if (DEBUG)
+        console.log("categoryId: " + resourceName);
+    var path;
+    config.Paths.forEach(function (tempPath) {
+        if (tempPath.ApplicationId == applicationId
+            && tempPath.CategoryId == categoryId
+            && tempPath.Name == resourceName)
+            path = tempPath;
+    });
+    if (DEBUG)
+        console.log("resource: " + path);
+    var currentTime = new Date();
+    var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
+    var apiresult = new ApiResult();
+    var collection = new Collection();
+    collection.Version = "1.0.0.0";
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
+    collection.Href = fullUrl;
+    var oldestFilesItem = new Item();
+    oldestFilesItem.Href = "";
+    oldestFilesItem.Links = null;
+    var fd = new FilesDetails();
+    fd.Files = files.sort(compareFileInfoAsc).slice(0, 30);
+    oldestFilesItem.Data = fd;
+    collection.Items.push(oldestFilesItem);
+    var template = new Template();
+    template.data = new Array();
+    template.data.push(loadFileContent("templates/filesList.html"));
+    collection.Template = template;
+    apiresult.Collection = collection;
+    res.send(apiresult);
+});
+router.get('/FilesDetailsNewest', function (req, res) {
+    res.type("application/json");
+    var resourceName = req.query.resourceName;
+    var categoryName = req.query.categoryName;
+    var applicationName = req.query.applicationName;
+    loadConfiguration();
+    var applicationId;
+    config.Applications.forEach(function (application) {
+        if (application.Name == applicationName) {
+            applicationId = application.ApplicationId;
+            return;
+        }
+    });
+    console.log("Application Id: " + applicationId);
+    var categoryId;
+    config.Categories.forEach(function (category) {
+        if (category.Name == categoryName) {
+            categoryId = category.CategoryId;
+            return;
+        }
+    });
+    console.log("Category Id: " + categoryId);
+    if (DEBUG)
+        console.log("categoryId: " + resourceName);
+    var path;
+    config.Paths.forEach(function (tempPath) {
+        if (tempPath.ApplicationId == applicationId
+            && tempPath.CategoryId == categoryId
+            && tempPath.Name == resourceName)
+            path = tempPath;
+    });
+    if (DEBUG)
+        console.log("resource: " + path);
+    var currentTime = new Date();
+    var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
+    var apiresult = new ApiResult();
+    var collection = new Collection();
+    collection.Version = "1.0.0.0";
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
+    collection.Href = fullUrl;
+    var oldestFilesItem = new Item();
+    oldestFilesItem.Href = "";
+    oldestFilesItem.Links = null;
+    var fd = new FilesDetails();
+    fd.Files = files.sort(compareFileInfoDesc).slice(0, 30);
+    oldestFilesItem.Data = fd;
+    collection.Items.push(oldestFilesItem);
+    var template = new Template();
+    template.data = new Array();
+    template.data.push(loadFileContent("templates/filesList.html"));
+    collection.Template = template;
+    apiresult.Collection = collection;
+    res.send(apiresult);
+});
+router.get('/source', function (req, res) {
+    res.type("application/json");
     loadConfiguration();
     var currentTime = new Date();
     var source = new Source();
@@ -267,6 +409,7 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/source', function (req, res) {
     });
     res.send(source);
 });
+app.use('/IM/Monitor/Agent/NodeJS/Files', router);
 var server = app.listen(PORT, function () {
     var host = server.address().address;
     var port = server.address().port;

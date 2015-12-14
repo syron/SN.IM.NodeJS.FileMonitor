@@ -13,6 +13,7 @@
 /// <reference path="models/Action.ts" />
 /// <reference path="models/item.ts" />
 /// <reference path="models/ApiResult.ts" />
+/// <reference path="models/FilesDetails.ts" />
 
 declare var process:any;
 declare function require(name:string);
@@ -26,6 +27,7 @@ var fs = require("fs");
 var os = require("os");
 var argv = require("minimist")(process.argv.slice(2));
 var app: any = express();
+var router: any = express.Router();
 var configFile: string;
 var config: any;
 
@@ -49,10 +51,20 @@ catch (ex) {
 	process.exit();
 }
 
+var loadFileContent = function(file) {
+	try {
+		return fs.readFileSync(file, 'utf8');
+	}
+	catch (ex) {
+		console.log("Error loading configuration file '" + configFile + "'.");
+		process.exit();
+	}
+}
+
 var loadConfiguration = function() {
 	// load configuration
 	try {
-		config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+		config = JSON.parse(loadFileContent(configFile));
 	}
 	catch (ex) {
 		console.log("Error loading configuration file '" + configFile + "'.");
@@ -61,18 +73,33 @@ var loadConfiguration = function() {
 };
 
 
+function compareFileInfoAsc(a: FileInfo,b: FileInfo): number {
+  if (a.Time < b.Time)
+    return -1;
+  if (a.Time > b.Time)
+    return 1;
+  return 0;
+}
+
+function compareFileInfoDesc(a: FileInfo,b: FileInfo): number {
+  if (a.Time < b.Time)
+    return 1;
+  if (a.Time > b.Time)
+    return -1;
+  return 0;
+}
+
+
+
+
 var monitor: FileMonitor = new FileMonitor();
 
-app.get('/IM/Monitor/Agent/NodeJS/Files/', function (req, res) {
-   
-});
-
-app.get('/IM/Monitor/Agent/NodeJS/Files/isalive', function (req, res) {
+router.get('/isalive', function (req, res) {
    	res.type("application/json");
 	res.send("true");
 });
 
-app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
+router.get('/actions', function (req, res) {
 	
 	res.type("application/json");
 	
@@ -123,7 +150,6 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
 	oldestFilesItem.Data = oldestFilesAction;
 	
 	collection.Items.push(oldestFilesItem);
-		
 	
 	apiresult.Collection = collection;
 	
@@ -131,8 +157,174 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/actions', function (req, res) {
 	
 });
 
-app.get('/IM/Monitor/Agent/NodeJS/Files/source', function(req, res) {
-	res.setHeader('Content-Type', 'application/json');
+router.get('/FilesDetailsOldest', function(req, res) {
+	res.type("application/json");
+	
+	var resourceName: string = req.query.resourceName;
+	var categoryName: string = req.query.categoryName;
+	var applicationName: string = req.query.applicationName;
+	
+	loadConfiguration();
+	
+	// get applicationId
+	var applicationId: number;
+	config.Applications.forEach(function(application) {
+		if (application.Name == applicationName) {
+			applicationId = application.ApplicationId;
+			return;
+		}
+	});
+	console.log("Application Id: "+ applicationId);
+	// get categoryId
+	var categoryId: number;
+	config.Categories.forEach(function(category) {
+		if (category.Name == categoryName) {
+			categoryId = category.CategoryId;
+			return;
+		}
+	});
+	console.log("Category Id: "+ categoryId);
+	
+	if (DEBUG) console.log("categoryId: " + resourceName);
+	
+	// get path
+	var path: any;
+	config.Paths.forEach(function(tempPath) {
+		if (tempPath.ApplicationId == applicationId
+			&& tempPath.CategoryId == categoryId
+			&& tempPath.Name == resourceName)
+			path = tempPath;
+	});
+	
+	if (DEBUG) console.log("resource: " + path);
+	
+	var currentTime: Date = new Date();
+	
+	var files = monitor.readDirRecursively(<string>path.Path
+		, currentTime
+		, new TimeSpan(<string>path.WarningTimeInterval)
+		, new TimeSpan(<string>path.ErrorTimeInterval)
+		, StatusCode[<string>path.TimeEvaluationProperty]
+		, Boolean(<string>path.IncludeChildFolders)
+		, path.ExcludeChildFoldersList
+		, path.Filter);
+		
+		
+	
+	var apiresult: ApiResult = new ApiResult();
+	
+	var collection: Collection = new Collection();
+	collection.Version = "1.0.0.0";
+	
+	var fullUrl= req.protocol + '://' + req.hostname  + ':'+PORT + req.path;
+	collection.Href = fullUrl;
+	
+	// oldest files action
+	var oldestFilesItem: Item = new Item();
+	oldestFilesItem.Href = "";
+	oldestFilesItem.Links = null;
+	
+	var fd: FilesDetails = new FilesDetails();
+	fd.Files = files.sort(compareFileInfoAsc).slice(0, 30);
+	
+	oldestFilesItem.Data = fd;
+	
+	collection.Items.push(oldestFilesItem);
+	
+	var template:Template = new Template();
+	template.data = new Array<any>(); 
+	template.data.push(loadFileContent("templates/filesList.html"));
+	
+	collection.Template = template;
+	
+	apiresult.Collection = collection;
+	
+	res.send(apiresult);
+});
+
+router.get('/FilesDetailsNewest', function(req, res) {
+	res.type("application/json");
+	
+	var resourceName: string = req.query.resourceName;
+	var categoryName: string = req.query.categoryName;
+	var applicationName: string = req.query.applicationName;
+	
+	loadConfiguration();
+	
+	// get applicationId
+	var applicationId: number;
+	config.Applications.forEach(function(application) {
+		if (application.Name == applicationName) {
+			applicationId = application.ApplicationId;
+			return;
+		}
+	});
+	// get categoryId
+	var categoryId: number;
+	config.Categories.forEach(function(category) {
+		if (category.Name == categoryName) {
+			categoryId = category.CategoryId;
+			return;
+		}
+	});
+	
+	
+	// get path
+	var path: any;
+	config.Paths.forEach(function(tempPath) {
+		if (tempPath.ApplicationId == applicationId
+			&& tempPath.CategoryId == categoryId
+			&& tempPath.Name == resourceName)
+			path = tempPath;
+	});
+	
+	
+	var currentTime: Date = new Date();
+	
+	var files = monitor.readDirRecursively(<string>path.Path
+		, currentTime
+		, new TimeSpan(<string>path.WarningTimeInterval)
+		, new TimeSpan(<string>path.ErrorTimeInterval)
+		, StatusCode[<string>path.TimeEvaluationProperty]
+		, Boolean(<string>path.IncludeChildFolders)
+		, path.ExcludeChildFoldersList
+		, path.Filter);
+		
+		
+	
+	var apiresult: ApiResult = new ApiResult();
+	
+	var collection: Collection = new Collection();
+	collection.Version = "1.0.0.0";
+	
+	var fullUrl= req.protocol + '://' + req.hostname  + ':'+PORT + req.path;
+	collection.Href = fullUrl;
+	
+	// oldest files action
+	var oldestFilesItem: Item = new Item();
+	oldestFilesItem.Href = "";
+	oldestFilesItem.Links = null;
+	
+	var fd: FilesDetails = new FilesDetails();
+	fd.Files = files.sort(compareFileInfoDesc).slice(0, 30);
+	
+	oldestFilesItem.Data = fd;
+	
+	collection.Items.push(oldestFilesItem);
+	
+	var template:Template = new Template();
+	template.data = new Array<any>(); 
+	template.data.push(loadFileContent("templates/filesList.html"));
+	
+	collection.Template = template;
+	
+	apiresult.Collection = collection;
+	
+	res.send(apiresult);
+});
+
+router.get('/source', function(req, res) {
+	res.type("application/json");
 	
 	loadConfiguration();
 	
@@ -190,6 +382,8 @@ app.get('/IM/Monitor/Agent/NodeJS/Files/source', function(req, res) {
 	
 	res.send(source);
 });
+
+app.use('/IM/Monitor/Agent/NodeJS/Files', router);
 
 var server = app.listen(PORT, function () {
 
