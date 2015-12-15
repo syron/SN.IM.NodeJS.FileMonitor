@@ -6,7 +6,6 @@ declare function require(name:string);
 var fs = require('fs');
 
 class FileMonitor {
-	
 	private folder: string;
 		
 	public readDirRecursively  = function (dir: string, currentTime: Date, warningTimeSpan: TimeSpan, errorTimeSpan: TimeSpan, validationTime: FileTimeValidationProperty, includeChildFolders: boolean, excludeChildFoldersList: Array<string>, filter: string) : Array<FileInfo> {
@@ -17,8 +16,8 @@ class FileMonitor {
 		
 		var files: Array<FileInfo> = new Array<FileInfo>();
 		
-		var errorTime: Date = errorTimeSpan.convert(currentTime);
-		var warningTime: Date = warningTimeSpan.convert(currentTime);
+		var errorTime: Date = errorTimeSpan.substractFromDate(currentTime);
+		var warningTime: Date = warningTimeSpan.substractFromDate(currentTime);
 		
 		for (var i = 0; i < directoryContent.length; i++) {
 			var currentContent = directoryContent[i];
@@ -30,7 +29,6 @@ class FileMonitor {
 					files = files.concat(this.readDirRecursively(fileFullPath, currentTime, warningTimeSpan, errorTimeSpan, validationTime));
 			}
 			if (fileStat.isFile()) {
-					
 				if(currentContent.search(filter) != -1) {
 					
 					var info: FileInfo = new FileInfo();
@@ -55,18 +53,12 @@ class FileMonitor {
 					else if (info.Time < warningTime) info.Status = StatusCode.Warning;
 					
 					if (info.Status != StatusCode.OK) {
-						
 						files.push(info);
-						
 					}
-					
-				
 				}
-	
 			}
 		}
 		
 		return files;
 	}
-	
 }

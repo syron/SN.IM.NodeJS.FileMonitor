@@ -17,9 +17,23 @@ var FileTimeValidationProperty;
     FileTimeValidationProperty[FileTimeValidationProperty["atime"] = 1] = "atime";
     FileTimeValidationProperty[FileTimeValidationProperty["mtime"] = 2] = "mtime";
 })(FileTimeValidationProperty || (FileTimeValidationProperty = {}));
+/**
+ * Creates a new TimeSpan.
+ * @class
+ */
 var TimeSpan = (function () {
+    /**
+     * @description Constructor initializing TimeSpan.
+     * @param {string} timeSpan The timespan in format d.hh:mm:ss
+     * @return {TimeSpan}
+     */
     function TimeSpan(timeSpan) {
-        this.convert = function (date) {
+        /**
+         * @description Substracts the stored TimeSpan from a given date.
+         * @param {Date} The date object from which to substract the TimeSpan.
+         * @return {Date}
+         */
+        this.substractFromDate = function (date) {
             var firstSplit = this.timeSpan.split('.');
             var secondSplit = firstSplit[1].split(':');
             var days = parseInt(firstSplit[0]);
@@ -29,6 +43,22 @@ var TimeSpan = (function () {
             var totalSecondsToSubstract = seconds + (minutes * 60) + (hours * 60 * 60) + (days * 24 * 60 * 60);
             var outDate = new Date(date.toString());
             return new Date(outDate.setSeconds(date.getSeconds() - totalSecondsToSubstract));
+        };
+        /**
+         * @description Adds the stored TimeSpan to a given date.
+         * @param {Date} The date object to which to add the TimeSpan.
+         * @return {Date}
+         */
+        this.addToDate = function (date) {
+            var firstSplit = this.timeSpan.split('.');
+            var secondSplit = firstSplit[1].split(':');
+            var days = parseInt(firstSplit[0]);
+            var hours = parseInt(secondSplit[0]);
+            var minutes = parseInt(secondSplit[1]);
+            var seconds = parseInt(secondSplit[2]);
+            var totalSecondsToSubstract = seconds + (minutes * 60) + (hours * 60 * 60) + (days * 24 * 60 * 60);
+            var outDate = new Date(date.toString());
+            return new Date(outDate.setSeconds(date.getSeconds() + totalSecondsToSubstract));
         };
         this.timeSpan = timeSpan;
     }
@@ -45,8 +75,8 @@ var FileMonitor = (function () {
                 dir = dir + '\\';
             var directoryContent = fs.readdirSync(dir);
             var files = new Array();
-            var errorTime = errorTimeSpan.convert(currentTime);
-            var warningTime = warningTimeSpan.convert(currentTime);
+            var errorTime = errorTimeSpan.substractFromDate(currentTime);
+            var warningTime = warningTimeSpan.substractFromDate(currentTime);
             for (var i = 0; i < directoryContent.length; i++) {
                 var currentContent = directoryContent[i];
                 var fileFullPath = dir + currentContent;
@@ -142,6 +172,13 @@ var Collection = (function () {
     return Collection;
 })();
 var Field = (function () {
+    /**
+     * @description Constructor
+     * @param {string} name The name of the Field
+     * @param {string} description The description of the Field
+     * @param {string} type The type of the field, e.g. string
+     * @return {Field}
+     */
     function Field(name, description, type) {
         this.Name = name;
         this.Description = description;
@@ -151,6 +188,15 @@ var Field = (function () {
 })();
 /// <reference path="Field.ts" />
 var Action = (function () {
+    /** @description Constructor initializing the Action with all required properties.
+    * @param {string} actionId A unique identifier for this action of type GUID.
+    * @param {string} name The name of the action.
+    * @param {string} displayName The name to display in Integration Manager.
+    * @param {string} description The description of this action for improving the UX (User Experience)
+    * @param {string} method The HTTP verb used to execute the action. (Available methods are: GET, POST, PUT, DELETE).
+    * @param {Array<Field>} fields Fields used when executing the actions. These fields are used as parameters.
+    * @return {Action}
+    */
     function Action(actionId, name, displayName, description, method, fields) {
         if (fields === void 0) { fields = new Array(); }
         this.ActionId = actionId;
@@ -160,6 +206,10 @@ var Action = (function () {
         this.Method = method;
         this.Fields = fields;
     }
+    /** @description Adds a field used as a parameter in the action request to this monitor agent.
+    * @param {Field} field The field used as a paremeter.
+    * @return {void}
+    */
     Action.prototype.AddField = function (field) {
         this.Fields.push(field);
     };
