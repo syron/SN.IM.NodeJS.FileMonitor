@@ -1,3 +1,7 @@
+/**
+ * Creates a new Item.
+ * @class
+ */
 class Item {
 	public Href: string;
 	public Data: any;
