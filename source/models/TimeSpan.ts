@@ -1,7 +1,20 @@
+/**
+ * Creates a new TimeSpan.
+ * @class
+ */
 class TimeSpan {
 	
+	/**
+	 * The Timespan
+	 * @type {string}
+	 */
 	private timeSpan: string;
 	
+	/**
+	 * @description Constructor initializing TimeSpan.
+	 * @param {string} timeSpan The timespan in format d.hh:mm:ss
+	 * @return {TimeSpan} 
+	 */
 	constructor(timeSpan: string) {
 		this.timeSpan = timeSpan;
 	}
@@ -25,5 +38,4 @@ class TimeSpan {
 		var outDate = new Date(date.toString());
 		return new Date(outDate.setSeconds(date.getSeconds() - totalSecondsToSubstract));
 	}
-	
 }
