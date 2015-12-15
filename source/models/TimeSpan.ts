@@ -6,6 +6,11 @@ class TimeSpan {
 		this.timeSpan = timeSpan;
 	}
 	
+	/**
+	 * @description Converts a timespan to a date.
+	 * @param {Date} date the day from which to substract the timespan.
+	 * @return {Date}
+	 */
 	public convert = function(date: Date) : Date {
 		var firstSplit = this.timeSpan.split('.');
 		var secondSplit = firstSplit[1].split(':');
