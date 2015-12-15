@@ -4,6 +4,6 @@ class ApiResult {
 	public Collection: Collection;
 	
 	constructor() {
-		this.Collection = null;
+		this.Collection = new Collection();
 	}
 }

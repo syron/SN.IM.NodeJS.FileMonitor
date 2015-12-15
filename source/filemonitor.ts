@@ -21,6 +21,7 @@ declare function require(name:string);
 var DEFAULTCONFIGFILE: string = "config.json";
 var DEBUG: boolean = true;
 var PORT: number = 8080;
+var BASEURI: string = "/IM/Monitor/Agent/NodeJS/Files";
 
 var express = require("express");
 var fs = require("fs");
@@ -105,49 +106,47 @@ router.get('/actions', function (req, res) {
 	
 	var apiresult: ApiResult = new ApiResult();
 	
-	var collection: Collection = new Collection();
+	var collection: Collection = apiresult.Collection;
 	collection.Version = "1.0.0.0";
 	
-	var fullUrl= req.protocol + '://' + req.hostname  + ':'+PORT + req.path;
-	collection.Href = fullUrl;
+	var fullUrl= req.protocol + '://' + req.hostname  + ':'+ PORT + BASEURI ;
+	collection.Href = fullUrl + req.path;
 	
 	// oldest files action
+	var oldestFilesAction: Action = new Action(
+		"12012393-716f-4545-ab09-0fca87d61eb9"
+		, "FilesDetailsOldest"
+		, "Details (30 oldest)"
+		, "Shows a list of the 30 oldest files."
+		, "GET");
+	
+	oldestFilesAction.AddField(new Field("resourceName", "Name of the resource", "string"));
+	oldestFilesAction.AddField(new Field("categoryName", "Name of the category", "string"));
+	oldestFilesAction.AddField(new Field("applicationName", "Name of the application", "string"));
+	
 	var oldestFilesItem: Item = new Item();
-	oldestFilesItem.Href = "";
+	oldestFilesItem.Href = fullUrl + "/" + oldestFilesAction.Name;
 	oldestFilesItem.Links = null;
-	
-	var oldestFilesAction: Action = new Action();
-	oldestFilesAction.ActionId = "12012393-716f-4545-ab09-0fca87d61eb9";
-	oldestFilesAction.Name = "FilesDetailsOldest";
-	oldestFilesAction.DisplayName = "Details (30 oldest)";
-	oldestFilesAction.Description = "Shows a list of the 30 oldest files.";
-	oldestFilesAction.Method = "GET";
-	
-	oldestFilesAction.Fields.push(new Field("resourceName", "Name of the resource", "string"));
-	oldestFilesAction.Fields.push(new Field("categoryName", "Name of the category", "string"));
-	oldestFilesAction.Fields.push(new Field("applicationName", "Name of the application", "string"));
-	
 	oldestFilesItem.Data = oldestFilesAction;
 	
 	collection.Items.push(oldestFilesItem);
 	
 	// newest files action
+	var newestFilesAction: Action = new Action(
+		"12000093-716f-4545-ab09-0fca87d61eb9"
+		, "FilesDetailsNewest"
+		, "Details (30 newest)"
+		, "Shows a list of the 30 newest files."
+		, "GET");
+	
+	newestFilesAction.AddField(new Field("resourceName", "Name of the resource", "string"));
+	newestFilesAction.AddField(new Field("categoryName", "Name of the category", "string"));
+	newestFilesAction.AddField(new Field("applicationName", "Name of the application", "string"));
+	
 	var oldestFilesItem: Item = new Item();
-	oldestFilesItem.Href = "";
+	oldestFilesItem.Href = fullUrl + "/" + newestFilesAction.Name;
 	oldestFilesItem.Links = null;
-	
-	var oldestFilesAction: Action = new Action();
-	oldestFilesAction.ActionId = "12000093-716f-4545-ab09-0fca87d61eb9";
-	oldestFilesAction.Name = "FilesDetailsNewest";
-	oldestFilesAction.DisplayName = "Details (30 newest)";
-	oldestFilesAction.Description = "Shows a list of the 30 newest files.";
-	oldestFilesAction.Method = "GET";
-	
-	oldestFilesAction.Fields.push(new Field("resourceName", "Name of the resource", "string"));
-	oldestFilesAction.Fields.push(new Field("categoryName", "Name of the category", "string"));
-	oldestFilesAction.Fields.push(new Field("applicationName", "Name of the application", "string"));
-	
-	oldestFilesItem.Data = oldestFilesAction;
+	oldestFilesItem.Data = newestFilesAction;
 	
 	collection.Items.push(oldestFilesItem);
 	
@@ -297,7 +296,7 @@ router.get('/FilesDetailsNewest', function(req, res) {
 	var collection: Collection = new Collection();
 	collection.Version = "1.0.0.0";
 	
-	var fullUrl= req.protocol + '://' + req.hostname  + ':'+PORT + req.path;
+	var fullUrl= req.protocol + '://' + req.hostname  + ':'+ PORT + req.path;
 	collection.Href = fullUrl;
 	
 	// oldest files action
@@ -383,13 +382,14 @@ router.get('/source', function(req, res) {
 	res.send(source);
 });
 
-app.use('/IM/Monitor/Agent/NodeJS/Files', router);
+
+app.use(BASEURI, router);
 
 var server = app.listen(PORT, function () {
 
   var host = server.address().address;
   var port = server.address().port;
-
-  console.log("IM NodeJS File Monitor listening at http://%s:%s", host, port)
+  
+  console.log("IM NodeJS File Monitor listening.")
 
 });

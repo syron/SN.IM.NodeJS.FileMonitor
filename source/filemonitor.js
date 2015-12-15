@@ -5,6 +5,7 @@ var StatusCode;
     StatusCode[StatusCode["Error"] = 2] = "Error";
     StatusCode[StatusCode["Unavailable"] = 3] = "Unavailable";
 })(StatusCode || (StatusCode = {}));
+/// <reference path="StatusCode.ts" />
 var FileInfo = (function () {
     function FileInfo() {
     }
@@ -33,6 +34,9 @@ var TimeSpan = (function () {
     }
     return TimeSpan;
 })();
+/// <reference path="FileInfo.ts" />
+/// <reference path="FileTimeValidationProperty.ts" />
+/// <reference path="TimeSpan.ts" />
 var fs = require('fs');
 var FileMonitor = (function () {
     function FileMonitor() {
@@ -94,11 +98,15 @@ var Category = (function () {
     }
     return Category;
 })();
+/// <reference path="StatusCode.ts" />
 var Resource = (function () {
     function Resource() {
     }
     return Resource;
 })();
+/// <reference path="Application.ts" />
+/// <reference path="Category.ts" />
+/// <reference path="Resource.ts" />
 var Source = (function () {
     function Source() {
         this.Applications = new Array();
@@ -120,6 +128,8 @@ var Template = (function () {
     }
     return Template;
 })();
+/// <reference path="Item.ts" />
+/// <reference path="Template.ts" />
 var Collection = (function () {
     function Collection() {
         this.Items = new Array();
@@ -139,27 +149,56 @@ var Field = (function () {
     }
     return Field;
 })();
+/// <reference path="Field.ts" />
 var Action = (function () {
-    function Action() {
-        this.Fields = new Array();
+    function Action(actionId, name, displayName, description, method, fields) {
+        if (fields === void 0) { fields = new Array(); }
+        this.ActionId = actionId;
+        this.Name = name;
+        this.DisplayName = displayName;
+        this.Description = description;
+        this.Method = method;
+        this.Fields = fields;
     }
+    Action.prototype.AddField = function (field) {
+        this.Fields.push(field);
+    };
     return Action;
 })();
+/// <reference path="Collection.ts" />
 var ApiResult = (function () {
     function ApiResult() {
-        this.Collection = null;
+        this.Collection = new Collection();
     }
     return ApiResult;
 })();
+/// <reference path="FileInfo" />
 var FilesDetails = (function () {
     function FilesDetails() {
         this.Files = new Array();
     }
     return FilesDetails;
 })();
+/// <reference path="defintionFiles/node.d.ts" />
+/// <reference path="models/StatusCode.ts" />
+/// <reference path="models/FileInfo.ts" />
+/// <reference path="models/FileTimeValidationProperty.ts" />
+/// <reference path="models/TimeSpan.ts" />
+/// <reference path="models/FileMonitor.ts" />
+/// <reference path="models/Application.ts" />
+/// <reference path="models/Category.ts" />
+/// <reference path="models/Source.ts" />
+/// <reference path="models/Resource.ts" />
+/// <reference path="models/Collection.ts" />
+/// <reference path="models/Field.ts" />
+/// <reference path="models/Action.ts" />
+/// <reference path="models/item.ts" />
+/// <reference path="models/ApiResult.ts" />
+/// <reference path="models/FilesDetails.ts" />
 var DEFAULTCONFIGFILE = "config.json";
 var DEBUG = true;
 var PORT = 8080;
+var BASEURI = "/IM/Monitor/Agent/NodeJS/Files";
 var express = require("express");
 var fs = require("fs");
 var os = require("os");
@@ -168,6 +207,7 @@ var app = express();
 var router = express.Router();
 var configFile;
 var config;
+// parse config file from arguments, default: config.json
 if (typeof argv.c == "string") {
     configFile = argv.c;
 }
@@ -176,6 +216,7 @@ else {
 }
 if (DEBUG)
     console.log("Configuration file set to " + configFile + ".");
+// checks if file exists.
 try {
     var fileinfo = fs.statSync(configFile);
 }
@@ -194,6 +235,7 @@ var loadFileContent = function (file) {
     }
 };
 var loadConfiguration = function () {
+    // load configuration
     try {
         config = JSON.parse(loadFileContent(configFile));
     }
@@ -224,37 +266,29 @@ router.get('/isalive', function (req, res) {
 router.get('/actions', function (req, res) {
     res.type("application/json");
     var apiresult = new ApiResult();
-    var collection = new Collection();
+    var collection = apiresult.Collection;
     collection.Version = "1.0.0.0";
-    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
-    collection.Href = fullUrl;
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + BASEURI;
+    collection.Href = fullUrl + req.path;
+    // oldest files action
+    var oldestFilesAction = new Action("12012393-716f-4545-ab09-0fca87d61eb9", "FilesDetailsOldest", "Details (30 oldest)", "Shows a list of the 30 oldest files.", "GET");
+    oldestFilesAction.AddField(new Field("resourceName", "Name of the resource", "string"));
+    oldestFilesAction.AddField(new Field("categoryName", "Name of the category", "string"));
+    oldestFilesAction.AddField(new Field("applicationName", "Name of the application", "string"));
     var oldestFilesItem = new Item();
-    oldestFilesItem.Href = "";
+    oldestFilesItem.Href = fullUrl + "/" + oldestFilesAction.Name;
     oldestFilesItem.Links = null;
-    var oldestFilesAction = new Action();
-    oldestFilesAction.ActionId = "12012393-716f-4545-ab09-0fca87d61eb9";
-    oldestFilesAction.Name = "FilesDetailsOldest";
-    oldestFilesAction.DisplayName = "Details (30 oldest)";
-    oldestFilesAction.Description = "Shows a list of the 30 oldest files.";
-    oldestFilesAction.Method = "GET";
-    oldestFilesAction.Fields.push(new Field("resourceName", "Name of the resource", "string"));
-    oldestFilesAction.Fields.push(new Field("categoryName", "Name of the category", "string"));
-    oldestFilesAction.Fields.push(new Field("applicationName", "Name of the application", "string"));
     oldestFilesItem.Data = oldestFilesAction;
     collection.Items.push(oldestFilesItem);
+    // newest files action
+    var newestFilesAction = new Action("12000093-716f-4545-ab09-0fca87d61eb9", "FilesDetailsNewest", "Details (30 newest)", "Shows a list of the 30 newest files.", "GET");
+    newestFilesAction.AddField(new Field("resourceName", "Name of the resource", "string"));
+    newestFilesAction.AddField(new Field("categoryName", "Name of the category", "string"));
+    newestFilesAction.AddField(new Field("applicationName", "Name of the application", "string"));
     var oldestFilesItem = new Item();
-    oldestFilesItem.Href = "";
+    oldestFilesItem.Href = fullUrl + "/" + newestFilesAction.Name;
     oldestFilesItem.Links = null;
-    var oldestFilesAction = new Action();
-    oldestFilesAction.ActionId = "12000093-716f-4545-ab09-0fca87d61eb9";
-    oldestFilesAction.Name = "FilesDetailsNewest";
-    oldestFilesAction.DisplayName = "Details (30 newest)";
-    oldestFilesAction.Description = "Shows a list of the 30 newest files.";
-    oldestFilesAction.Method = "GET";
-    oldestFilesAction.Fields.push(new Field("resourceName", "Name of the resource", "string"));
-    oldestFilesAction.Fields.push(new Field("categoryName", "Name of the category", "string"));
-    oldestFilesAction.Fields.push(new Field("applicationName", "Name of the application", "string"));
-    oldestFilesItem.Data = oldestFilesAction;
+    oldestFilesItem.Data = newestFilesAction;
     collection.Items.push(oldestFilesItem);
     apiresult.Collection = collection;
     res.send(apiresult);
@@ -265,6 +299,7 @@ router.get('/FilesDetailsOldest', function (req, res) {
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
     loadConfiguration();
+    // get applicationId
     var applicationId;
     config.Applications.forEach(function (application) {
         if (application.Name == applicationName) {
@@ -273,6 +308,7 @@ router.get('/FilesDetailsOldest', function (req, res) {
         }
     });
     console.log("Application Id: " + applicationId);
+    // get categoryId
     var categoryId;
     config.Categories.forEach(function (category) {
         if (category.Name == categoryName) {
@@ -283,6 +319,7 @@ router.get('/FilesDetailsOldest', function (req, res) {
     console.log("Category Id: " + categoryId);
     if (DEBUG)
         console.log("categoryId: " + resourceName);
+    // get path
     var path;
     config.Paths.forEach(function (tempPath) {
         if (tempPath.ApplicationId == applicationId
@@ -299,6 +336,7 @@ router.get('/FilesDetailsOldest', function (req, res) {
     collection.Version = "1.0.0.0";
     var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
     collection.Href = fullUrl;
+    // oldest files action
     var oldestFilesItem = new Item();
     oldestFilesItem.Href = "";
     oldestFilesItem.Links = null;
@@ -319,6 +357,7 @@ router.get('/FilesDetailsNewest', function (req, res) {
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
     loadConfiguration();
+    // get applicationId
     var applicationId;
     config.Applications.forEach(function (application) {
         if (application.Name == applicationName) {
@@ -326,7 +365,7 @@ router.get('/FilesDetailsNewest', function (req, res) {
             return;
         }
     });
-    console.log("Application Id: " + applicationId);
+    // get categoryId
     var categoryId;
     config.Categories.forEach(function (category) {
         if (category.Name == categoryName) {
@@ -334,9 +373,7 @@ router.get('/FilesDetailsNewest', function (req, res) {
             return;
         }
     });
-    console.log("Category Id: " + categoryId);
-    if (DEBUG)
-        console.log("categoryId: " + resourceName);
+    // get path
     var path;
     config.Paths.forEach(function (tempPath) {
         if (tempPath.ApplicationId == applicationId
@@ -344,8 +381,6 @@ router.get('/FilesDetailsNewest', function (req, res) {
             && tempPath.Name == resourceName)
             path = tempPath;
     });
-    if (DEBUG)
-        console.log("resource: " + path);
     var currentTime = new Date();
     var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
     var apiresult = new ApiResult();
@@ -353,6 +388,7 @@ router.get('/FilesDetailsNewest', function (req, res) {
     collection.Version = "1.0.0.0";
     var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
     collection.Href = fullUrl;
+    // oldest files action
     var oldestFilesItem = new Item();
     oldestFilesItem.Href = "";
     oldestFilesItem.Links = null;
@@ -409,9 +445,9 @@ router.get('/source', function (req, res) {
     });
     res.send(source);
 });
-app.use('/IM/Monitor/Agent/NodeJS/Files', router);
+app.use(BASEURI, router);
 var server = app.listen(PORT, function () {
     var host = server.address().address;
     var port = server.address().port;
-    console.log("IM NodeJS File Monitor listening at http://%s:%s", host, port);
+    console.log("IM NodeJS File Monitor listening.");
 });

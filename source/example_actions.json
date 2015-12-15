@@ -1,0 +1,69 @@
+{
+   "Collection":{
+      "Version":"4.0.0.2",
+      "Href":"http://localhost:8000/IM/Monitor/Agent/FileFolder/actions",
+      "Items":[
+         {
+            "Href":null,
+            "Data":{
+               "ActionId":"12000093-716f-4545-ab09-0fca87d61eb9",
+               "Name":"FilesDetailsNewest",
+               "DisplayName":"Details (30 newest)",
+               "Description":"Shows a list of the 30 newest files.",
+               "Method":"GET",
+               "Fields":[
+                  {
+                     "Name":"resourceName",
+                     "Description":"Name of the resource",
+                     "Type":"string"
+                  },
+                  {
+                     "Name":"categoryName",
+                     "Description":"Name of the category",
+                     "Type":"string"
+                  },
+                  {
+                     "Name":"applicationName",
+                     "Description":"Name of the application",
+                     "Type":"string"
+                  }
+               ]
+            },
+            "Links":null
+         },
+         {
+            "Href":null,
+            "Data":{
+               "ActionId":"12012393-716f-4545-ab09-0fca87d61eb9",
+               "Name":"FilesDetailsOldest",
+               "DisplayName":"Details (30 oldest)",
+               "Description":"Shows a list of the 30 oldest files.",
+               "Method":"GET",
+               "Fields":[
+                  {
+                     "Name":"resourceName",
+                     "Description":"Name of the resource",
+                     "Type":"string"
+                  },
+                  {
+                     "Name":"categoryName",
+                     "Description":"Name of the category",
+                     "Type":"string"
+                  },
+                  {
+                     "Name":"applicationName",
+                     "Description":"Name of the application",
+                     "Type":"string"
+                  }
+               ]
+            },
+            "Links":null
+         }
+      ],
+      "Links":null,
+      "Queries":null,
+      "Template":null,
+      "Pagination":null,
+      "Error":null
+   }
+}
