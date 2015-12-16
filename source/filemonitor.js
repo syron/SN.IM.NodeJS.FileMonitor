@@ -145,6 +145,10 @@ var Source = (function () {
     }
     return Source;
 })();
+/**
+ * Creates a new Item.
+ * @class
+ */
 var Item = (function () {
     function Item() {
         this.Href = null;
@@ -187,15 +191,12 @@ var Field = (function () {
     return Field;
 })();
 /// <reference path="Field.ts" />
+/**
+ * An action is used to be executed by Integration Manager.
+ */
 var Action = (function () {
-    /** @description Constructor initializing the Action with all required properties.
-    * @param {string} actionId A unique identifier for this action of type GUID.
-    * @param {string} name The name of the action.
-    * @param {string} displayName The name to display in Integration Manager.
-    * @param {string} description The description of this action for improving the UX (User Experience)
-    * @param {string} method The HTTP verb used to execute the action. (Available methods are: GET, POST, PUT, DELETE).
-    * @param {Array<Field>} fields Fields used when executing the actions. These fields are used as parameters.
-    * @return {Action}
+    /**
+     * Initializes an Action.
     */
     function Action(actionId, name, displayName, description, method, fields) {
         if (fields === void 0) { fields = new Array(); }
@@ -206,9 +207,8 @@ var Action = (function () {
         this.Method = method;
         this.Fields = fields;
     }
-    /** @description Adds a field used as a parameter in the action request to this monitor agent.
-    * @param {Field} field The field used as a paremeter.
-    * @return {void}
+    /**
+     * Adds a field used as a parameter in the action request to this monitor agent.
     */
     Action.prototype.AddField = function (field) {
         this.Fields.push(field);
@@ -223,7 +223,13 @@ var ApiResult = (function () {
     return ApiResult;
 })();
 /// <reference path="FileInfo" />
+/**
+ * File Details object containing a list of files and which time property has been used for validation.
+ */
 var FilesDetails = (function () {
+    /**
+     * Creates and initiates the FilesDetails object.
+     */
     function FilesDetails() {
         this.Files = new Array();
     }
@@ -245,10 +251,15 @@ var FilesDetails = (function () {
 /// <reference path="models/item.ts" />
 /// <reference path="models/ApiResult.ts" />
 /// <reference path="models/FilesDetails.ts" />
+var settings = require("./settings.json");
 var DEFAULTCONFIGFILE = "config.json";
-var DEBUG = true;
-var PORT = 8080;
-var BASEURI = "/IM/Monitor/Agent/NodeJS/Files";
+var DEBUG = Boolean(settings.Debug);
+var PORT = parseInt(settings.Port);
+var BASEURI = settings.BaseURI;
+var XAPIKEYENABLED = Boolean(settings.Authentication.Enabled);
+var XAPIKEY = settings.Authentication.Key;
+if (DEBUG)
+    console.log("Settings loaded. Debug=%s, Port=%s, BaseURI=%s, AuthenticationEnabled=%s, Key=%s", DEBUG, PORT, BASEURI, XAPIKEYENABLED, XAPIKEY);
 var express = require("express");
 var fs = require("fs");
 var os = require("os");

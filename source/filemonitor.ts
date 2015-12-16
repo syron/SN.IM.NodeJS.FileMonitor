@@ -18,10 +18,16 @@
 declare var process:any;
 declare function require(name:string);
 
+var settings = require("./settings.json");
+
 var DEFAULTCONFIGFILE: string = "config.json";
-var DEBUG: boolean = true;
-var PORT: number = 8080;
-var BASEURI: string = "/IM/Monitor/Agent/NodeJS/Files";
+var DEBUG: boolean = Boolean(settings.Debug);
+var PORT: number = parseInt(settings.Port);
+var BASEURI: string = settings.BaseURI;
+var XAPIKEYENABLED: boolean = Boolean(settings.Authentication.Enabled);
+var XAPIKEY: string = settings.Authentication.Key;
+
+if (DEBUG) console.log("Settings loaded. Debug=%s, Port=%s, BaseURI=%s, AuthenticationEnabled=%s, Key=%s", DEBUG, PORT, BASEURI, XAPIKEYENABLED, XAPIKEY);
 
 var express = require("express");
 var fs = require("fs");

@@ -1,0 +1,9 @@
+{
+	"Port": 8080,
+	"BaseURI": "/IM/Monitor/Agent/NodeJS/FileFolder",
+	"Debug": false,
+	"Authentication": {
+		"Enabled": true,
+		"Key": "Hello World"
+	}
+}
