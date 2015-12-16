@@ -9,6 +9,20 @@ var StatusCode;
 var FileInfo = (function () {
     function FileInfo() {
     }
+    FileInfo.compareFileInfoAsc = function (a, b) {
+        if (a.Time < b.Time)
+            return -1;
+        if (a.Time > b.Time)
+            return 1;
+        return 0;
+    };
+    FileInfo.compareFileInfoDesc = function (a, b) {
+        if (a.Time < b.Time)
+            return 1;
+        if (a.Time > b.Time)
+            return -1;
+        return 0;
+    };
     return FileInfo;
 })();
 var FileTimeValidationProperty;
@@ -294,16 +308,19 @@ catch (ex) {
     console.log("Example: node filemonitor.js -config " + configFile);
     process.exit();
 }
-var loadFileContent = function (file) {
+/** Loads content from file - UTF8 default */
+var loadFileContent = function (filePath, encoding) {
+    if (encoding === void 0) { encoding = 'utf8'; }
     try {
-        return fs.readFileSync(file, 'utf8');
+        return fs.readFileSync(filePath, 'utf8');
     }
     catch (ex) {
         console.log("Error loading configuration file '" + configFile + "'.");
         process.exit();
     }
 };
-var loadConfiguration = function () {
+/** Parses file content to JSON. */
+var parseToJson = function () {
     // load configuration
     try {
         config = JSON.parse(loadFileContent(configFile));
@@ -313,20 +330,6 @@ var loadConfiguration = function () {
         process.exit();
     }
 };
-function compareFileInfoAsc(a, b) {
-    if (a.Time < b.Time)
-        return -1;
-    if (a.Time > b.Time)
-        return 1;
-    return 0;
-}
-function compareFileInfoDesc(a, b) {
-    if (a.Time < b.Time)
-        return 1;
-    if (a.Time > b.Time)
-        return -1;
-    return 0;
-}
 var requestIsValid = function (req) {
     var status = new RequestStatus();
     var xApiKey = req.headers["x-apikey"];
@@ -395,7 +398,7 @@ router.get('/FilesDetailsOldest', function (req, res) {
     var resourceName = req.query.resourceName;
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
-    loadConfiguration();
+    parseToJson();
     // get applicationId
     var applicationId;
     config.Applications.forEach(function (application) {
@@ -438,7 +441,7 @@ router.get('/FilesDetailsOldest', function (req, res) {
     oldestFilesItem.Href = "";
     oldestFilesItem.Links = null;
     var fd = new FilesDetails();
-    fd.Files = files.sort(compareFileInfoAsc).slice(0, 30);
+    fd.Files = files.sort(FileInfo.compareFileInfoAsc).slice(0, 30);
     oldestFilesItem.Data = fd;
     collection.Items.push(oldestFilesItem);
     var template = new Template();
@@ -458,7 +461,7 @@ router.get('/FilesDetailsNewest', function (req, res) {
     var resourceName = req.query.resourceName;
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
-    loadConfiguration();
+    parseToJson();
     // get applicationId
     var applicationId;
     config.Applications.forEach(function (application) {
@@ -495,7 +498,7 @@ router.get('/FilesDetailsNewest', function (req, res) {
     oldestFilesItem.Href = "";
     oldestFilesItem.Links = null;
     var fd = new FilesDetails();
-    fd.Files = files.sort(compareFileInfoDesc).slice(0, 30);
+    fd.Files = files.sort(FileInfo.compareFileInfoDesc).slice(0, 30);
     oldestFilesItem.Data = fd;
     collection.Items.push(oldestFilesItem);
     var template = new Template();
@@ -512,7 +515,7 @@ router.get('/source', function (req, res) {
         res.status(validateRequest.StatusCode).send(validateRequest.Message);
         return;
     }
-    loadConfiguration();
+    parseToJson();
     var currentTime = new Date();
     var source = new Source();
     var applications = new Array();

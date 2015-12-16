@@ -59,9 +59,10 @@ catch (ex) {
 	process.exit();
 }
 
-var loadFileContent = function(file) {
+/** Loads content from file - UTF8 default */
+var loadFileContent = function(filePath: string, encoding: string = 'utf8') {
 	try {
-		return fs.readFileSync(file, 'utf8');
+		return fs.readFileSync(filePath, 'utf8');
 	}
 	catch (ex) {
 		console.log("Error loading configuration file '" + configFile + "'.");
@@ -69,7 +70,8 @@ var loadFileContent = function(file) {
 	}
 }
 
-var loadConfiguration = function() {
+/** Parses file content to JSON. */
+var parseToJson = function() {
 	// load configuration
 	try {
 		config = JSON.parse(loadFileContent(configFile));
@@ -79,25 +81,6 @@ var loadConfiguration = function() {
 		process.exit();
 	}
 };
-
-
-function compareFileInfoAsc(a: FileInfo,b: FileInfo): number {
-  if (a.Time < b.Time)
-    return -1;
-  if (a.Time > b.Time)
-    return 1;
-  return 0;
-}
-
-function compareFileInfoDesc(a: FileInfo,b: FileInfo): number {
-  if (a.Time < b.Time)
-    return 1;
-  if (a.Time > b.Time)
-    return -1;
-  return 0;
-}
-
-
 
 
 var requestIsValid = function(req) : RequestStatus {
@@ -210,7 +193,7 @@ router.get('/FilesDetailsOldest', function(req, res) {
 	var categoryName: string = req.query.categoryName;
 	var applicationName: string = req.query.applicationName;
 	
-	loadConfiguration();
+	parseToJson();
 	
 	// get applicationId
 	var applicationId: number;
@@ -271,7 +254,7 @@ router.get('/FilesDetailsOldest', function(req, res) {
 	oldestFilesItem.Links = null;
 	
 	var fd: FilesDetails = new FilesDetails();
-	fd.Files = files.sort(compareFileInfoAsc).slice(0, 30);
+	fd.Files = files.sort(FileInfo.compareFileInfoAsc).slice(0, 30);
 	
 	oldestFilesItem.Data = fd;
 	
@@ -302,7 +285,7 @@ router.get('/FilesDetailsNewest', function(req, res) {
 	var categoryName: string = req.query.categoryName;
 	var applicationName: string = req.query.applicationName;
 	
-	loadConfiguration();
+	parseToJson();
 	
 	// get applicationId
 	var applicationId: number;
@@ -359,7 +342,7 @@ router.get('/FilesDetailsNewest', function(req, res) {
 	oldestFilesItem.Links = null;
 	
 	var fd: FilesDetails = new FilesDetails();
-	fd.Files = files.sort(compareFileInfoDesc).slice(0, 30);
+	fd.Files = files.sort(FileInfo.compareFileInfoDesc).slice(0, 30);
 	
 	oldestFilesItem.Data = fd;
 	
@@ -386,7 +369,7 @@ router.get('/source', function(req, res) {
 		return;
 	}
 	
-	loadConfiguration();
+	parseToJson();
 	
 	var currentTime = new Date();
 	
