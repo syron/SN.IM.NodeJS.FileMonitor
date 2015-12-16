@@ -30,4 +30,3 @@ class Action {
 		this.Fields.push(field);
 	}
 }
-
