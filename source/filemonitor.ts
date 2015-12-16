@@ -14,6 +14,7 @@
 /// <reference path="models/item.ts" />
 /// <reference path="models/ApiResult.ts" />
 /// <reference path="models/FilesDetails.ts" />
+/// <reference path="models/RequestStatus.ts" />
 
 declare var process:any;
 declare function require(name:string);
@@ -99,16 +100,49 @@ function compareFileInfoDesc(a: FileInfo,b: FileInfo): number {
 
 
 
+var requestIsValid = function(req) : RequestStatus {
+	var status: RequestStatus = new RequestStatus();
+	
+	var xApiKey = req.headers["x-apikey"];
+	if (XAPIKEYENABLED) {
+		if (typeof xApiKey === "undefined"
+			|| xApiKey != XAPIKEY)  
+		{
+			status.IsValid = false;
+			status.StatusCode = 401;
+			status.Message = "Unauthorized";
+		}
+	}
+	
+	return status;	
+};
+
+
+
 var monitor: FileMonitor = new FileMonitor();
 
 router.get('/isalive', function (req, res) {
-   	res.type("application/json");
-	res.send("true");
+	res.type("application/json");
+	
+	var validateRequest: RequestStatus = requestIsValid(req);
+	if (!validateRequest.IsValid) {
+		
+		res.status(validateRequest.StatusCode).send(validateRequest.Message);
+		return;
+	}
+   	
+	res.status(200).send("true");
 });
 
 router.get('/actions', function (req, res) {
-	
 	res.type("application/json");
+	
+	var validateRequest: RequestStatus = requestIsValid(req);
+	if (!validateRequest.IsValid) {
+		
+		res.status(validateRequest.StatusCode).send(validateRequest.Message);
+		return;
+	}
 	
 	var apiresult: ApiResult = new ApiResult();
 	
@@ -164,6 +198,13 @@ router.get('/actions', function (req, res) {
 
 router.get('/FilesDetailsOldest', function(req, res) {
 	res.type("application/json");
+	
+	var validateRequest: RequestStatus = requestIsValid(req);
+	if (!validateRequest.IsValid) {
+		
+		res.status(validateRequest.StatusCode).send(validateRequest.Message);
+		return;
+	}
 	
 	var resourceName: string = req.query.resourceName;
 	var categoryName: string = req.query.categoryName;
@@ -250,6 +291,13 @@ router.get('/FilesDetailsOldest', function(req, res) {
 router.get('/FilesDetailsNewest', function(req, res) {
 	res.type("application/json");
 	
+	var validateRequest: RequestStatus = requestIsValid(req);
+	if (!validateRequest.IsValid) {
+		
+		res.status(validateRequest.StatusCode).send(validateRequest.Message);
+		return;
+	}
+	
 	var resourceName: string = req.query.resourceName;
 	var categoryName: string = req.query.categoryName;
 	var applicationName: string = req.query.applicationName;
@@ -330,6 +378,13 @@ router.get('/FilesDetailsNewest', function(req, res) {
 
 router.get('/source', function(req, res) {
 	res.type("application/json");
+	
+	var validateRequest: RequestStatus = requestIsValid(req);
+	if (!validateRequest.IsValid) {
+		
+		res.status(validateRequest.StatusCode).send(validateRequest.Message);
+		return;
+	}
 	
 	loadConfiguration();
 	

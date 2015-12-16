@@ -235,6 +235,13 @@ var FilesDetails = (function () {
     }
     return FilesDetails;
 })();
+var RequestStatus = (function () {
+    function RequestStatus() {
+        this.IsValid = true;
+        this.StatusCode = 200;
+    }
+    return RequestStatus;
+})();
 /// <reference path="defintionFiles/node.d.ts" />
 /// <reference path="models/StatusCode.ts" />
 /// <reference path="models/FileInfo.ts" />
@@ -251,6 +258,7 @@ var FilesDetails = (function () {
 /// <reference path="models/item.ts" />
 /// <reference path="models/ApiResult.ts" />
 /// <reference path="models/FilesDetails.ts" />
+/// <reference path="models/RequestStatus.ts" />
 var settings = require("./settings.json");
 var DEFAULTCONFIGFILE = "config.json";
 var DEBUG = Boolean(settings.Debug);
@@ -319,13 +327,36 @@ function compareFileInfoDesc(a, b) {
         return -1;
     return 0;
 }
+var requestIsValid = function (req) {
+    var status = new RequestStatus();
+    var xApiKey = req.headers["x-apikey"];
+    if (XAPIKEYENABLED) {
+        if (typeof xApiKey === "undefined"
+            || xApiKey != XAPIKEY) {
+            status.IsValid = false;
+            status.StatusCode = 401;
+            status.Message = "Unauthorized";
+        }
+    }
+    return status;
+};
 var monitor = new FileMonitor();
 router.get('/isalive', function (req, res) {
     res.type("application/json");
-    res.send("true");
+    var validateRequest = requestIsValid(req);
+    if (!validateRequest.IsValid) {
+        res.status(validateRequest.StatusCode).send(validateRequest.Message);
+        return;
+    }
+    res.status(200).send("true");
 });
 router.get('/actions', function (req, res) {
     res.type("application/json");
+    var validateRequest = requestIsValid(req);
+    if (!validateRequest.IsValid) {
+        res.status(validateRequest.StatusCode).send(validateRequest.Message);
+        return;
+    }
     var apiresult = new ApiResult();
     var collection = apiresult.Collection;
     collection.Version = "1.0.0.0";
@@ -356,6 +387,11 @@ router.get('/actions', function (req, res) {
 });
 router.get('/FilesDetailsOldest', function (req, res) {
     res.type("application/json");
+    var validateRequest = requestIsValid(req);
+    if (!validateRequest.IsValid) {
+        res.status(validateRequest.StatusCode).send(validateRequest.Message);
+        return;
+    }
     var resourceName = req.query.resourceName;
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
@@ -414,6 +450,11 @@ router.get('/FilesDetailsOldest', function (req, res) {
 });
 router.get('/FilesDetailsNewest', function (req, res) {
     res.type("application/json");
+    var validateRequest = requestIsValid(req);
+    if (!validateRequest.IsValid) {
+        res.status(validateRequest.StatusCode).send(validateRequest.Message);
+        return;
+    }
     var resourceName = req.query.resourceName;
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
@@ -466,6 +507,11 @@ router.get('/FilesDetailsNewest', function (req, res) {
 });
 router.get('/source', function (req, res) {
     res.type("application/json");
+    var validateRequest = requestIsValid(req);
+    if (!validateRequest.IsValid) {
+        res.status(validateRequest.StatusCode).send(validateRequest.Message);
+        return;
+    }
     loadConfiguration();
     var currentTime = new Date();
     var source = new Source();
