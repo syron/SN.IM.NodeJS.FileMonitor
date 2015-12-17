@@ -10,5 +10,6 @@ class Item {
 	constructor() {
 		this.Href = null;
 		this.Links = null;
+		this.Data = null;
 	}
 }
