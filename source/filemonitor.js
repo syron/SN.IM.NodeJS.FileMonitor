@@ -5,7 +5,6 @@ var StatusCode;
     StatusCode[StatusCode["Error"] = 2] = "Error";
     StatusCode[StatusCode["Unavailable"] = 3] = "Unavailable";
 })(StatusCode || (StatusCode = {}));
-/// <reference path="StatusCode.ts" />
 var FileInfo = (function () {
     function FileInfo() {
     }
@@ -31,22 +30,8 @@ var FileTimeValidationProperty;
     FileTimeValidationProperty[FileTimeValidationProperty["atime"] = 1] = "atime";
     FileTimeValidationProperty[FileTimeValidationProperty["mtime"] = 2] = "mtime";
 })(FileTimeValidationProperty || (FileTimeValidationProperty = {}));
-/**
- * Creates a new TimeSpan.
- * @class
- */
 var TimeSpan = (function () {
-    /**
-     * @description Constructor initializing TimeSpan.
-     * @param {string} timeSpan The timespan in format d.hh:mm:ss
-     * @return {TimeSpan}
-     */
     function TimeSpan(timeSpan) {
-        /**
-         * @description Substracts the stored TimeSpan from a given date.
-         * @param {Date} The date object from which to substract the TimeSpan.
-         * @return {Date}
-         */
         this.substractFromDate = function (date) {
             var firstSplit = this.timeSpan.split('.');
             var secondSplit = firstSplit[1].split(':');
@@ -58,11 +43,6 @@ var TimeSpan = (function () {
             var outDate = new Date(date.toString());
             return new Date(outDate.setSeconds(date.getSeconds() - totalSecondsToSubstract));
         };
-        /**
-         * @description Adds the stored TimeSpan to a given date.
-         * @param {Date} The date object to which to add the TimeSpan.
-         * @return {Date}
-         */
         this.addToDate = function (date) {
             var firstSplit = this.timeSpan.split('.');
             var secondSplit = firstSplit[1].split(':');
@@ -78,9 +58,6 @@ var TimeSpan = (function () {
     }
     return TimeSpan;
 })();
-/// <reference path="FileInfo.ts" />
-/// <reference path="FileTimeValidationProperty.ts" />
-/// <reference path="TimeSpan.ts" />
 var fs = require('fs');
 var FileMonitor = (function () {
     function FileMonitor() {
@@ -142,15 +119,11 @@ var Category = (function () {
     }
     return Category;
 })();
-/// <reference path="StatusCode.ts" />
 var Resource = (function () {
     function Resource() {
     }
     return Resource;
 })();
-/// <reference path="Application.ts" />
-/// <reference path="Category.ts" />
-/// <reference path="Resource.ts" />
 var Source = (function () {
     function Source() {
         this.Applications = new Array();
@@ -159,14 +132,11 @@ var Source = (function () {
     }
     return Source;
 })();
-/**
- * Creates a new Item.
- * @class
- */
 var Item = (function () {
     function Item() {
         this.Href = null;
         this.Links = null;
+        this.Data = null;
     }
     return Item;
 })();
@@ -176,8 +146,6 @@ var Template = (function () {
     }
     return Template;
 })();
-/// <reference path="Item.ts" />
-/// <reference path="Template.ts" />
 var Collection = (function () {
     function Collection() {
         this.Items = new Array();
@@ -190,13 +158,6 @@ var Collection = (function () {
     return Collection;
 })();
 var Field = (function () {
-    /**
-     * @description Constructor
-     * @param {string} name The name of the Field
-     * @param {string} description The description of the Field
-     * @param {string} type The type of the field, e.g. string
-     * @return {Field}
-     */
     function Field(name, description, type) {
         this.Name = name;
         this.Description = description;
@@ -204,14 +165,7 @@ var Field = (function () {
     }
     return Field;
 })();
-/// <reference path="Field.ts" />
-/**
- * An action is used to be executed by Integration Manager.
- */
 var Action = (function () {
-    /**
-     * Initializes an Action.
-    */
     function Action(actionId, name, displayName, description, method, fields) {
         if (fields === void 0) { fields = new Array(); }
         this.ActionId = actionId;
@@ -221,29 +175,18 @@ var Action = (function () {
         this.Method = method;
         this.Fields = fields;
     }
-    /**
-     * Adds a field used as a parameter in the action request to this monitor agent.
-    */
     Action.prototype.AddField = function (field) {
         this.Fields.push(field);
     };
     return Action;
 })();
-/// <reference path="Collection.ts" />
 var ApiResult = (function () {
     function ApiResult() {
         this.Collection = new Collection();
     }
     return ApiResult;
 })();
-/// <reference path="FileInfo" />
-/**
- * File Details object containing a list of files and which time property has been used for validation.
- */
 var FilesDetails = (function () {
-    /**
-     * Creates and initiates the FilesDetails object.
-     */
     function FilesDetails() {
         this.Files = new Array();
     }
@@ -256,23 +199,6 @@ var RequestStatus = (function () {
     }
     return RequestStatus;
 })();
-/// <reference path="defintionFiles/node.d.ts" />
-/// <reference path="models/StatusCode.ts" />
-/// <reference path="models/FileInfo.ts" />
-/// <reference path="models/FileTimeValidationProperty.ts" />
-/// <reference path="models/TimeSpan.ts" />
-/// <reference path="models/FileMonitor.ts" />
-/// <reference path="models/Application.ts" />
-/// <reference path="models/Category.ts" />
-/// <reference path="models/Source.ts" />
-/// <reference path="models/Resource.ts" />
-/// <reference path="models/Collection.ts" />
-/// <reference path="models/Field.ts" />
-/// <reference path="models/Action.ts" />
-/// <reference path="models/item.ts" />
-/// <reference path="models/ApiResult.ts" />
-/// <reference path="models/FilesDetails.ts" />
-/// <reference path="models/RequestStatus.ts" />
 var settings = require("./settings.json");
 var DEFAULTCONFIGFILE = "config.json";
 var DEBUG = Boolean(settings.Debug);
@@ -290,7 +216,6 @@ var app = express();
 var router = express.Router();
 var configFile;
 var config;
-// parse config file from arguments, default: config.json
 if (typeof argv.c == "string") {
     configFile = argv.c;
 }
@@ -299,7 +224,6 @@ else {
 }
 if (DEBUG)
     console.log("Configuration file set to " + configFile + ".");
-// checks if file exists.
 try {
     var fileinfo = fs.statSync(configFile);
 }
@@ -308,7 +232,6 @@ catch (ex) {
     console.log("Example: node filemonitor.js -config " + configFile);
     process.exit();
 }
-/** Loads content from file - UTF8 default */
 var loadFileContent = function (filePath, encoding) {
     if (encoding === void 0) { encoding = 'utf8'; }
     try {
@@ -319,9 +242,7 @@ var loadFileContent = function (filePath, encoding) {
         process.exit();
     }
 };
-/** Parses file content to JSON. */
 var parseToJson = function () {
-    // load configuration
     try {
         config = JSON.parse(loadFileContent(configFile));
     }
@@ -346,11 +267,6 @@ var requestIsValid = function (req) {
 var monitor = new FileMonitor();
 router.get('/isalive', function (req, res) {
     res.type("application/json");
-    var validateRequest = requestIsValid(req);
-    if (!validateRequest.IsValid) {
-        res.status(validateRequest.StatusCode).send(validateRequest.Message);
-        return;
-    }
     res.status(200).send("true");
 });
 router.get('/actions', function (req, res) {
@@ -365,7 +281,6 @@ router.get('/actions', function (req, res) {
     collection.Version = "1.0.0.0";
     var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + BASEURI;
     collection.Href = fullUrl + req.path;
-    // oldest files action
     var oldestFilesAction = new Action("12012393-716f-4545-ab09-0fca87d61eb9", "FilesDetailsOldest", "Details (30 oldest)", "Shows a list of the 30 oldest files.", "GET");
     oldestFilesAction.AddField(new Field("resourceName", "Name of the resource", "string"));
     oldestFilesAction.AddField(new Field("categoryName", "Name of the category", "string"));
@@ -375,7 +290,6 @@ router.get('/actions', function (req, res) {
     oldestFilesItem.Links = null;
     oldestFilesItem.Data = oldestFilesAction;
     collection.Items.push(oldestFilesItem);
-    // newest files action
     var newestFilesAction = new Action("12000093-716f-4545-ab09-0fca87d61eb9", "FilesDetailsNewest", "Details (30 newest)", "Shows a list of the 30 newest files.", "GET");
     newestFilesAction.AddField(new Field("resourceName", "Name of the resource", "string"));
     newestFilesAction.AddField(new Field("categoryName", "Name of the category", "string"));
@@ -399,7 +313,6 @@ router.get('/FilesDetailsOldest', function (req, res) {
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
     parseToJson();
-    // get applicationId
     var applicationId;
     config.Applications.forEach(function (application) {
         if (application.Name == applicationName) {
@@ -408,7 +321,6 @@ router.get('/FilesDetailsOldest', function (req, res) {
         }
     });
     console.log("Application Id: " + applicationId);
-    // get categoryId
     var categoryId;
     config.Categories.forEach(function (category) {
         if (category.Name == categoryName) {
@@ -419,7 +331,6 @@ router.get('/FilesDetailsOldest', function (req, res) {
     console.log("Category Id: " + categoryId);
     if (DEBUG)
         console.log("categoryId: " + resourceName);
-    // get path
     var path;
     config.Paths.forEach(function (tempPath) {
         if (tempPath.ApplicationId == applicationId
@@ -436,7 +347,6 @@ router.get('/FilesDetailsOldest', function (req, res) {
     collection.Version = "1.0.0.0";
     var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
     collection.Href = fullUrl;
-    // oldest files action
     var oldestFilesItem = new Item();
     oldestFilesItem.Href = "";
     oldestFilesItem.Links = null;
@@ -462,7 +372,6 @@ router.get('/FilesDetailsNewest', function (req, res) {
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
     parseToJson();
-    // get applicationId
     var applicationId;
     config.Applications.forEach(function (application) {
         if (application.Name == applicationName) {
@@ -470,7 +379,6 @@ router.get('/FilesDetailsNewest', function (req, res) {
             return;
         }
     });
-    // get categoryId
     var categoryId;
     config.Categories.forEach(function (category) {
         if (category.Name == categoryName) {
@@ -478,7 +386,6 @@ router.get('/FilesDetailsNewest', function (req, res) {
             return;
         }
     });
-    // get path
     var path;
     config.Paths.forEach(function (tempPath) {
         if (tempPath.ApplicationId == applicationId
@@ -493,7 +400,6 @@ router.get('/FilesDetailsNewest', function (req, res) {
     collection.Version = "1.0.0.0";
     var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
     collection.Href = fullUrl;
-    // oldest files action
     var oldestFilesItem = new Item();
     oldestFilesItem.Href = "";
     oldestFilesItem.Links = null;

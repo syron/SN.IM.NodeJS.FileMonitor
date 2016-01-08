@@ -41,7 +41,7 @@
 			"ReturnAllFileNames": true,
 			"ExcludeChildFoldersList": [],
 			"TimeEvaluationProperty": "ctime",
-			"Filter": "setup"
+			"Filter": ""
 		}
 	]
 }

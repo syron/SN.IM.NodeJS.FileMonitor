@@ -3,7 +3,7 @@
 	"BaseURI": "/IM/Monitor/Agent/NodeJS/FileFolder",
 	"Debug": false,
 	"Authentication": {
-		"Enabled": true,
+		"Enabled": false,
 		"Key": "Hello World"
 	}
 }

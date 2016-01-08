@@ -39,6 +39,7 @@ var router: any = express.Router();
 var configFile: string;
 var config: any;
 
+
 // parse config file from arguments, default: config.json
 if (typeof argv.c == "string") {
 	configFile = argv.c;
@@ -106,13 +107,13 @@ var monitor: FileMonitor = new FileMonitor();
 
 router.get('/isalive', function (req, res) {
 	res.type("application/json");
-	
-	var validateRequest: RequestStatus = requestIsValid(req);
-	if (!validateRequest.IsValid) {
-		
-		res.status(validateRequest.StatusCode).send(validateRequest.Message);
-		return;
-	}
+	// 
+	// var validateRequest: RequestStatus = requestIsValid(req);
+	// if (!validateRequest.IsValid) {
+	// 	
+	// 	res.status(validateRequest.StatusCode).send(validateRequest.Message);
+	// 	return;
+	// }
    	
 	res.status(200).send("true");
 });
