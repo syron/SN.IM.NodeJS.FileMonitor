@@ -8,4 +8,8 @@ class Resource {
 	public LogText: string;
 	public ErrorCode: number;
 	public StatusCode: StatusCode;
+    
+    public constructor() {
+        this.LogText = "";
+    }
 }

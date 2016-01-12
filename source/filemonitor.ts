@@ -412,7 +412,7 @@ router.get('/source', function(req, res) {
 			for (var i = 0; i < files.length; i++) {
 				var file = files[i];				
 				if (resource.LogText != "") resource.LogText = resource.LogText + " | ";
-				resource.LogText = resource.LogText + file.FullPath;
+                resource.LogText = resource.LogText + file.FullPath;
 			}
 		}
 		source.Resources.push(resource);

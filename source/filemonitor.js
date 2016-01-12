@@ -121,6 +121,7 @@ var Category = (function () {
 })();
 var Resource = (function () {
     function Resource() {
+        this.LogText = "";
     }
     return Resource;
 })();
@@ -320,7 +321,8 @@ router.get('/FilesDetailsOldest', function (req, res) {
             return;
         }
     });
-    console.log("Application Id: " + applicationId);
+    if (DEBUG)
+        console.log("Application Id: " + applicationId);
     var categoryId;
     config.Categories.forEach(function (category) {
         if (category.Name == categoryName) {
@@ -328,9 +330,8 @@ router.get('/FilesDetailsOldest', function (req, res) {
             return;
         }
     });
-    console.log("Category Id: " + categoryId);
     if (DEBUG)
-        console.log("categoryId: " + resourceName);
+        console.log("Category Id: " + categoryId);
     var path;
     config.Paths.forEach(function (tempPath) {
         if (tempPath.ApplicationId == applicationId
@@ -339,7 +340,7 @@ router.get('/FilesDetailsOldest', function (req, res) {
             path = tempPath;
     });
     if (DEBUG)
-        console.log("resource: " + path);
+        console.log("Path: " + path);
     var currentTime = new Date();
     var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
     var apiresult = new ApiResult();
@@ -379,6 +380,8 @@ router.get('/FilesDetailsNewest', function (req, res) {
             return;
         }
     });
+    if (DEBUG)
+        console.log("Application Id: " + applicationId);
     var categoryId;
     config.Categories.forEach(function (category) {
         if (category.Name == categoryName) {
@@ -386,6 +389,8 @@ router.get('/FilesDetailsNewest', function (req, res) {
             return;
         }
     });
+    if (DEBUG)
+        console.log("Category Id: " + categoryId);
     var path;
     config.Paths.forEach(function (tempPath) {
         if (tempPath.ApplicationId == applicationId
@@ -393,6 +398,8 @@ router.get('/FilesDetailsNewest', function (req, res) {
             && tempPath.Name == resourceName)
             path = tempPath;
     });
+    if (DEBUG)
+        console.log("Path: " + path);
     var currentTime = new Date();
     var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
     var apiresult = new ApiResult();

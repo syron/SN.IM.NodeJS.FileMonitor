@@ -33,14 +33,14 @@
 			"ApplicationId": 1,
 			"CategoryId": 3,
 			"Name": "Temp Folder",
-			"Path": "C:\\temp\\",
+			"Path": "C:\\Temp\\Test\\In",
 			"Description": "Temp Folder",
 			"IncludeChildFolders": true,
-			"WarningTimeInterval": "0.00:01:00",
+			"WarningTimeInterval": "0.00:00:10",
 			"ErrorTimeInterval": "0.00:02:00",
 			"ReturnAllFileNames": true,
 			"ExcludeChildFoldersList": [],
-			"TimeEvaluationProperty": "ctime",
+			"TimeEvaluationProperty": "mtime",
 			"Filter": ""
 		}
 	]
