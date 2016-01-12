@@ -39,7 +39,6 @@ var router: any = express.Router();
 var configFile: string;
 var config: any;
 
-
 // parse config file from arguments, default: config.json
 if (typeof argv.c == "string") {
 	configFile = argv.c;
@@ -107,14 +106,7 @@ var monitor: FileMonitor = new FileMonitor();
 
 router.get('/isalive', function (req, res) {
 	res.type("application/json");
-	// 
-	// var validateRequest: RequestStatus = requestIsValid(req);
-	// if (!validateRequest.IsValid) {
-	// 	
-	// 	res.status(validateRequest.StatusCode).send(validateRequest.Message);
-	// 	return;
-	// }
-   	
+	
 	res.status(200).send("true");
 });
 
@@ -185,7 +177,6 @@ router.get('/FilesDetailsOldest', function(req, res) {
 	
 	var validateRequest: RequestStatus = requestIsValid(req);
 	if (!validateRequest.IsValid) {
-		
 		res.status(validateRequest.StatusCode).send(validateRequest.Message);
 		return;
 	}
@@ -204,7 +195,9 @@ router.get('/FilesDetailsOldest', function(req, res) {
 			return;
 		}
 	});
-	console.log("Application Id: "+ applicationId);
+    if (DEBUG)
+	   console.log("Application Id: "+ applicationId);
+       
 	// get categoryId
 	var categoryId: number;
 	config.Categories.forEach(function(category) {
@@ -213,10 +206,9 @@ router.get('/FilesDetailsOldest', function(req, res) {
 			return;
 		}
 	});
-	console.log("Category Id: "+ categoryId);
-	
-	if (DEBUG) console.log("categoryId: " + resourceName);
-	
+	if (DEBUG) 
+        console.log("Category Id: "+ categoryId);
+    
 	// get path
 	var path: any;
 	config.Paths.forEach(function(tempPath) {
@@ -225,9 +217,10 @@ router.get('/FilesDetailsOldest', function(req, res) {
 			&& tempPath.Name == resourceName)
 			path = tempPath;
 	});
+	if (DEBUG) 
+        console.log("Path: " + path);
 	
-	if (DEBUG) console.log("resource: " + path);
-	
+    
 	var currentTime: Date = new Date();
 	
 	var files = monitor.readDirRecursively(<string>path.Path
@@ -238,8 +231,6 @@ router.get('/FilesDetailsOldest', function(req, res) {
 		, Boolean(<string>path.IncludeChildFolders)
 		, path.ExcludeChildFoldersList
 		, path.Filter);
-		
-		
 	
 	var apiresult: ApiResult = new ApiResult();
 	
@@ -296,6 +287,9 @@ router.get('/FilesDetailsNewest', function(req, res) {
 			return;
 		}
 	});
+    if (DEBUG)
+        console.log("Application Id: " + applicationId);
+    
 	// get categoryId
 	var categoryId: number;
 	config.Categories.forEach(function(category) {
@@ -304,7 +298,8 @@ router.get('/FilesDetailsNewest', function(req, res) {
 			return;
 		}
 	});
-	
+    if (DEBUG)
+        console.log("Category Id: " + categoryId);	
 	
 	// get path
 	var path: any;
@@ -314,6 +309,8 @@ router.get('/FilesDetailsNewest', function(req, res) {
 			&& tempPath.Name == resourceName)
 			path = tempPath;
 	});
+	if (DEBUG) 
+        console.log("Path: " + path);
 	
 	
 	var currentTime: Date = new Date();
@@ -326,9 +323,7 @@ router.get('/FilesDetailsNewest', function(req, res) {
 		, Boolean(<string>path.IncludeChildFolders)
 		, path.ExcludeChildFoldersList
 		, path.Filter);
-		
-		
-	
+			
 	var apiresult: ApiResult = new ApiResult();
 	
 	var collection: Collection = new Collection();
@@ -383,7 +378,6 @@ router.get('/source', function(req, res) {
 	source.Environment = config.Settings.Environment;
 	source.Version = config.Settings.Version;
 	source.Server = os.hostname();
-	
 	
 	config.Paths.forEach(function(path) {
 		var resource: Resource = new Resource();
