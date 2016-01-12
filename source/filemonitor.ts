@@ -247,7 +247,7 @@ router.get('/FilesDetailsOldest', function(req, res) {
 	
 	var fd: FilesDetails = new FilesDetails();
 	fd.Files = files.sort(FileInfo.compareFileInfoAsc).slice(0, 30);
-	
+    
 	oldestFilesItem.Data = fd;
 	
 	collection.Items.push(oldestFilesItem);
@@ -398,11 +398,11 @@ router.get('/source', function(req, res) {
 			, path.Filter);
 		
 		files.forEach(function (file) {
-			if (resource.StatusCode < StatusCode.Error && file.Status == StatusCode.Error) {
+			if (resource.StatusCode < StatusCode.Error && file.StatusCode == StatusCode.Error) {
 				resource.StatusCode = StatusCode.Error;
 				return;
 			}
-			else if (resource.StatusCode < StatusCode.Warning && file.Status == StatusCode.Warning) {
+			else if (resource.StatusCode < StatusCode.Warning && file.StatusCode == StatusCode.Warning) {
 				resource.StatusCode = StatusCode.Warning;
 				return;
 			}

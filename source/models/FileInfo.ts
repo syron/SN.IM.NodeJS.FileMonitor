@@ -3,7 +3,8 @@
 class FileInfo {
 	public Name: string;
 	public FullPath: string;
-	public Status: StatusCode;
+	public StatusCode: StatusCode;
+    public Status: string;
 	public Time: Date;
 	
 	public static compareFileInfoAsc = function (a: FileInfo,b: FileInfo): number {

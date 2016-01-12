@@ -34,7 +34,8 @@ class FileMonitor {
 					var info: FileInfo = new FileInfo();
 					info.Name = currentContent;
 					info.FullPath = fileFullPath;
-					info.Status = StatusCode.OK;
+					info.StatusCode = StatusCode.OK;
+                    info.Status = "OK"
 					
 					switch (validationTime) {
 						case FileTimeValidationProperty.atime:
@@ -49,10 +50,16 @@ class FileMonitor {
 							break;
 					}
 					
-					if (info.Time < errorTime) info.Status = StatusCode.Error;
-					else if (info.Time < warningTime) info.Status = StatusCode.Warning;
+					if (info.Time < errorTime) {
+                        info.StatusCode = StatusCode.Error;
+                        info.Status = "Error";
+                    }
+					else if (info.Time < warningTime) {
+                        info.StatusCode = StatusCode.Warning;
+                        info.Status = "Warning";
+                    }
 					
-					if (info.Status != StatusCode.OK) {
+					if (info.StatusCode != StatusCode.OK) {
 						files.push(info);
 					}
 				}

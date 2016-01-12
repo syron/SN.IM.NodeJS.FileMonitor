@@ -81,7 +81,8 @@ var FileMonitor = (function () {
                         var info = new FileInfo();
                         info.Name = currentContent;
                         info.FullPath = fileFullPath;
-                        info.Status = StatusCode.OK;
+                        info.StatusCode = StatusCode.OK;
+                        info.Status = "OK";
                         switch (validationTime) {
                             case FileTimeValidationProperty.atime:
                                 info.Time = fileStat.atime;
@@ -94,11 +95,15 @@ var FileMonitor = (function () {
                                 info.Time = fileStat.ctime;
                                 break;
                         }
-                        if (info.Time < errorTime)
-                            info.Status = StatusCode.Error;
-                        else if (info.Time < warningTime)
-                            info.Status = StatusCode.Warning;
-                        if (info.Status != StatusCode.OK) {
+                        if (info.Time < errorTime) {
+                            info.StatusCode = StatusCode.Error;
+                            info.Status = "Error";
+                        }
+                        else if (info.Time < warningTime) {
+                            info.StatusCode = StatusCode.Warning;
+                            info.Status = "Warning";
+                        }
+                        if (info.StatusCode != StatusCode.OK) {
                             files.push(info);
                         }
                     }
@@ -447,11 +452,11 @@ router.get('/source', function (req, res) {
         resource.ErrorCode = 0;
         var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
         files.forEach(function (file) {
-            if (resource.StatusCode < StatusCode.Error && file.Status == StatusCode.Error) {
+            if (resource.StatusCode < StatusCode.Error && file.StatusCode == StatusCode.Error) {
                 resource.StatusCode = StatusCode.Error;
                 return;
             }
-            else if (resource.StatusCode < StatusCode.Warning && file.Status == StatusCode.Warning) {
+            else if (resource.StatusCode < StatusCode.Warning && file.StatusCode == StatusCode.Warning) {
                 resource.StatusCode = StatusCode.Warning;
                 return;
             }
