@@ -426,6 +426,10 @@ router.get('/FilesDetailsNewest', function (req, res) {
     apiresult.Collection = collection;
     res.send(apiresult);
 });
+router.get('/FileOpen', function (req, res) {
+    res.type("application/octet-stream");
+    res.status(200).sendFile('C:\\Temp\\testfile.txt');
+});
 router.get('/source', function (req, res) {
     res.type("application/json");
     var validateRequest = requestIsValid(req);

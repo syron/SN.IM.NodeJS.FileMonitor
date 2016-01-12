@@ -50,6 +50,9 @@ Lists the 30 oldest files within the selected resource (folder).
 #### FilesDetailsNewest
 Lists the 30 newest files within the selected resource (folder).
 
+#### FileDownload
+Downloads a specific file.
+
 ### Start
 
 #### Without configuration file as parameter

@@ -355,6 +355,13 @@ router.get('/FilesDetailsNewest', function(req, res) {
 	res.send(apiresult);
 });
 
+/// Opens a specific file.
+router.get('/FileDownload', function(req, res) {
+	res.type("application/octet-stream");
+    
+    res.status(200).sendFile('C:\\Temp\\testfile.txt');
+});
+
 router.get('/source', function(req, res) {
 	res.type("application/json");
 	
