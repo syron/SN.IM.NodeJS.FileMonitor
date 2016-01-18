@@ -359,6 +359,60 @@ router.get('/FilesDetailsNewest', function(req, res) {
 router.get('/FileDownload', function(req, res) {
 	res.type("application/octet-stream");
     
+	var resourceName: string = req.query.resourceName;
+	var categoryName: string = req.query.categoryName;
+	var applicationName: string = req.query.applicationName;
+    var fileFullPath: string = req.query.fileFullPath;
+    
+    parseToJson();
+	
+	// get applicationId
+	var applicationId: number;
+	config.Applications.forEach(function(application) {
+		if (application.Name == applicationName) {
+			applicationId = application.ApplicationId;
+			return;
+		}
+	});
+    if (DEBUG)
+	   console.log("Application Id: "+ applicationId);
+       
+	// get categoryId
+	var categoryId: number;
+	config.Categories.forEach(function(category) {
+		if (category.Name == categoryName) {
+			categoryId = category.CategoryId;
+			return;
+		}
+	});
+	if (DEBUG) 
+        console.log("Category Id: "+ categoryId);
+    
+	// get path
+	var path: any;
+	config.Paths.forEach(function(tempPath) {
+		if (tempPath.ApplicationId == applicationId
+			&& tempPath.CategoryId == categoryId
+			&& tempPath.Name == resourceName)
+			path = tempPath;
+	});
+	if (DEBUG) 
+        console.log("Path: " + path);
+	
+    
+	var currentTime: Date = new Date();
+	
+	var files = monitor.readDirRecursively(<string>path.Path
+		, currentTime
+		, new TimeSpan(<string>path.WarningTimeInterval)
+		, new TimeSpan(<string>path.ErrorTimeInterval)
+		, StatusCode[<string>path.TimeEvaluationProperty]
+		, Boolean(<string>path.IncludeChildFolders)
+		, path.ExcludeChildFoldersList
+		, path.Filter);
+        
+    // loop through files to find fileName
+    
     res.status(200).sendFile('C:\\Temp\\testfile.txt');
 });
 
