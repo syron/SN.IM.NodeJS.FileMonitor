@@ -81,8 +81,10 @@ var FileMonitor = (function () {
                         var info = new FileInfo();
                         info.Name = currentContent;
                         info.FullPath = fileFullPath;
+                        info.EncodedFullPath = info.FullPath.replace(/\\/g, "\\\\");
                         info.StatusCode = StatusCode.OK;
                         info.Status = "OK";
+                        info.Size = (Math.round((fileStat.size / 1024) * 100) / 100).toFixed(2);
                         switch (validationTime) {
                             case FileTimeValidationProperty.atime:
                                 info.Time = fileStat.atime;
@@ -357,12 +359,14 @@ router.get('/FilesDetailsOldest', function (req, res) {
     oldestFilesItem.Href = "";
     oldestFilesItem.Links = null;
     var fd = new FilesDetails();
+    fd.TimeEvaluationType = path.TimeEvaluationProperty;
     fd.Files = files.sort(FileInfo.compareFileInfoAsc).slice(0, 30);
     oldestFilesItem.Data = fd;
     collection.Items.push(oldestFilesItem);
     var template = new Template();
     template.data = new Array();
     template.data.push(loadFileContent("templates/filesList.html"));
+    template.data.push(loadFileContent("templates/filesList.js"));
     collection.Template = template;
     apiresult.Collection = collection;
     res.send(apiresult);
@@ -416,19 +420,176 @@ router.get('/FilesDetailsNewest', function (req, res) {
     oldestFilesItem.Href = "";
     oldestFilesItem.Links = null;
     var fd = new FilesDetails();
+    fd.TimeEvaluationType = path.TimeEvaluationProperty;
     fd.Files = files.sort(FileInfo.compareFileInfoDesc).slice(0, 30);
     oldestFilesItem.Data = fd;
     collection.Items.push(oldestFilesItem);
     var template = new Template();
     template.data = new Array();
     template.data.push(loadFileContent("templates/filesList.html"));
+    template.data.push(loadFileContent("templates/filesList.js"));
     collection.Template = template;
     apiresult.Collection = collection;
     res.send(apiresult);
 });
-router.get('/FileOpen', function (req, res) {
+router.get('/FileDelete', function (req, res) {
     res.type("application/octet-stream");
-    res.status(200).sendFile('C:\\Temp\\testfile.txt');
+    var resourceName = req.query.resourceName;
+    var categoryName = req.query.categoryName;
+    var applicationName = req.query.applicationName;
+    var fileFullPath = req.query.File;
+    parseToJson();
+    var applicationId;
+    config.Applications.forEach(function (application) {
+        if (application.Name == applicationName) {
+            applicationId = application.ApplicationId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Application Id: " + applicationId);
+    var categoryId;
+    config.Categories.forEach(function (category) {
+        if (category.Name == categoryName) {
+            categoryId = category.CategoryId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Category Id: " + categoryId);
+    var path;
+    config.Paths.forEach(function (tempPath) {
+        if (tempPath.ApplicationId == applicationId
+            && tempPath.CategoryId == categoryId
+            && tempPath.Name == resourceName)
+            path = tempPath;
+    });
+    if (DEBUG)
+        console.log("Path: " + path);
+    var currentTime = new Date();
+    var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
+    var fileToDelete = "";
+    var fd = null;
+    files.forEach(function (file) {
+        if (file.FullPath == fileFullPath) {
+            fileToDelete = file.FullPath;
+        }
+    });
+    fs.unlinkSync(fileToDelete);
+    var apiresult = new ApiResult();
+    var collection = new Collection();
+    collection.Version = "1.0.0.0";
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
+    collection.Href = fullUrl;
+    collection.Template = null;
+    apiresult.Collection = collection;
+    res.status(200).send(apiresult);
+});
+router.get('/FileDownload', function (req, res) {
+    res.type("application/octet-stream");
+    var resourceName = req.query.resourceName;
+    var categoryName = req.query.categoryName;
+    var applicationName = req.query.applicationName;
+    var fileFullPath = req.query.File;
+    parseToJson();
+    var applicationId;
+    config.Applications.forEach(function (application) {
+        if (application.Name == applicationName) {
+            applicationId = application.ApplicationId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Application Id: " + applicationId);
+    var categoryId;
+    config.Categories.forEach(function (category) {
+        if (category.Name == categoryName) {
+            categoryId = category.CategoryId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Category Id: " + categoryId);
+    var path;
+    config.Paths.forEach(function (tempPath) {
+        if (tempPath.ApplicationId == applicationId
+            && tempPath.CategoryId == categoryId
+            && tempPath.Name == resourceName)
+            path = tempPath;
+    });
+    if (DEBUG)
+        console.log("Path: " + path);
+    var currentTime = new Date();
+    var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
+    var fileToDownload = "";
+    var fd = null;
+    files.forEach(function (file) {
+        if (file.FullPath == fileFullPath) {
+            fileToDownload = file.FullPath;
+        }
+    });
+    res.status(200).sendFile(fileToDownload);
+});
+router.get('/FileContent', function (req, res) {
+    res.type("application/octet-stream");
+    var resourceName = req.query.resourceName;
+    var categoryName = req.query.categoryName;
+    var applicationName = req.query.applicationName;
+    var fileFullPath = req.query.File;
+    parseToJson();
+    var applicationId;
+    config.Applications.forEach(function (application) {
+        if (application.Name == applicationName) {
+            applicationId = application.ApplicationId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Application Id: " + applicationId);
+    var categoryId;
+    config.Categories.forEach(function (category) {
+        if (category.Name == categoryName) {
+            categoryId = category.CategoryId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Category Id: " + categoryId);
+    var path;
+    config.Paths.forEach(function (tempPath) {
+        if (tempPath.ApplicationId == applicationId
+            && tempPath.CategoryId == categoryId
+            && tempPath.Name == resourceName)
+            path = tempPath;
+    });
+    if (DEBUG)
+        console.log("Path: " + path);
+    var currentTime = new Date();
+    var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
+    var apiresult = new ApiResult();
+    var collection = new Collection();
+    collection.Version = "1.0.0.0";
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
+    collection.Href = fullUrl;
+    var fileContent = new Item();
+    fileContent.Href = "";
+    fileContent.Links = null;
+    var filecontent = null;
+    var fd = null;
+    files.forEach(function (file) {
+        if (file.FullPath == fileFullPath) {
+            filecontent = fs.readFileSync(file.FullPath);
+            fd = filecontent.toString("utf8", 0, filecontent.length);
+        }
+    });
+    fileContent.Data = { FileName: fileFullPath, Content: fd };
+    collection.Items.push(fileContent);
+    var template = new Template();
+    template.data = new Array();
+    template.data.push(loadFileContent("templates/fileContent.html"));
+    collection.Template = template;
+    apiresult.Collection = collection;
+    res.send(apiresult);
 });
 router.get('/source', function (req, res) {
     res.type("application/json");

@@ -34,8 +34,10 @@ class FileMonitor {
 					var info: FileInfo = new FileInfo();
 					info.Name = currentContent;
 					info.FullPath = fileFullPath;
+                    info.EncodedFullPath = info.FullPath.replace(/\\/g, "\\\\");
 					info.StatusCode = StatusCode.OK;
                     info.Status = "OK"
+                    info.Size = (Math.round((fileStat.size / 1024) * 100) / 100).toFixed(2);
 					
 					switch (validationTime) {
 						case FileTimeValidationProperty.atime:

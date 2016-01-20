@@ -1,21 +1,57 @@
+
+<script type="text/javascript">
+
+window.imActionsCallbacks = [];
+window.imActionsCallbacks["FileDelete"] = {
+    init: function(event) {
+        console.log("init");
+        console.log(event);
+    },
+    onSuccess: function(event) {
+        console.log('hej');
+        console.log(event);
+    }
+};
+
+</script>
+
 {{#.}}
 <h3>Outdated Files</h3>
-<p>List of outdated files (restricted to max 30 rows).</p>
+<p>List of outdated files (restricted to max 30 rows). Time evaluation property: <b>{{TimeEvaluationType}}</b>.</p>
 <table class="table table-striped">
     <thead>
         <tr>
             <th>File Name</th>
             <th>Full Path</th>
             <th>Time</th>
-            <th>State</th></tr>
+            <th>Size (KB)</th>
+            <th>State</th>
+            <th class="text-right">Actions</th>
+        </tr>
     </thead>
     <tbody>
         {{#Files}}
         <tr>
             <td>{{Name}}</td>
             <td>{{FullPath}}</td>
-            <td>{{Time}}</td>     
-            <td>{{Status}} (Code: {{StatusCode}})</td>   
+            <td>{{Time}}</td>
+            <td>{{Size}}</td>     
+            <td>{{Status}} (Code: {{StatusCode}})</td>
+            <td class="text-right">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Actions <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li class="category text-left">ADMINISTRATION</li>
+                        <li class="divider"></li>
+                        <li><a href="#" ng-click="action('FileContent', { Target: 'Modal', Confirm: { Enabled: true, Message: 'Are you sure to overwrite content in the active model?' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)">Render in Modal</a></li>
+                        <li><a href="#" ng-click="action('FileContent', { Target: 'Tab', Confirm: { Enabled: false, Message: '' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)">Render in new Tab</a></li>
+                        <li><a href="#" ng-click="action('FileDownload', { Target: 'Download', Confirm: { Enabled: false, Message: '' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)">Download</a></li>
+                        <li><a href="#" ng-click="action('FileDelete', { Target: 'None', Confirm: { Enabled: true, Message: 'Are you sure to delete file \'{{EncodedFullPath}}\'?' }, Method: 'GET',  Data: { File: '{{EncodedFullPath}}' } }, $event)">Delete</a></li>
+                    </ul>
+                </div>
+            </td>
         </tr>
         {{/Files}}
     </tbody>
