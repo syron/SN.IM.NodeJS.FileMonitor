@@ -9,6 +9,7 @@
 /// <reference path="models/Source.ts" />
 /// <reference path="models/Resource.ts" />
 /// <reference path="models/Collection.ts" />
+/// <reference path="models/Error.ts" />
 /// <reference path="models/Field.ts" />
 /// <reference path="models/Action.ts" />
 /// <reference path="models/item.ts" />
@@ -423,25 +424,29 @@ router.get('/FileDelete', function(req, res) {
         }
     });
     
-    fs.unlinkSync(fileToDelete);
-    
     
     
     var apiresult: ApiResult = new ApiResult();
-	
 	var collection: Collection = new Collection();
 	collection.Version = "1.0.0.0";
-	
 	var fullUrl= req.protocol + '://' + req.hostname  + ':'+ PORT + req.path;
 	collection.Href = fullUrl;
-		
-	
 	collection.Template = null;
-	
+		
 	apiresult.Collection = collection;
     
-    
-    res.status(200).send(apiresult);
+    try {
+        fs.accessSync(path, fs.F_OK); 
+        fs.unlinkSync(fileToDelete);
+        res.status(200).send(apiresult);  
+    } catch (e) {
+        // It isn't accessible
+        collection.Error = new ApiError();
+        collection.Error.Code = "405",
+        collection.Error.Title = "File not found or/and not accessible for deletion.";
+        collection.Error.Message = "The requested file '" + fileFullPath + "' was not found or/and is not accessible for deletion. Please check if the file exists and/or if you have the proper access rights for deletion."
+        res.status(405).send(apiresult);  
+    }
 });
 
 /// Opens a specific file.

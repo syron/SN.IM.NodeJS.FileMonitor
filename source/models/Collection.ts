@@ -1,5 +1,6 @@
 /// <reference path="Item.ts" />
 /// <reference path="Template.ts" />
+/// <reference path="Error.ts" />
 
 
 class Collection {
@@ -10,7 +11,7 @@ class Collection {
 	public Queries: any;
 	public Template: Template;
 	public Pagination: any;
-	public Error: any;
+	public Error: ApiError;
 	
 	constructor() {
 		this.Items = new Array<Item>();
