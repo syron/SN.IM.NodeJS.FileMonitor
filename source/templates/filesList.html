@@ -3,13 +3,14 @@
 
 window.imActionsCallbacks = [];
 window.imActionsCallbacks["FileDelete"] = {
-    init: function(event) {
-        console.log("init");
-        console.log(event);
+    init: function(actionName, data, event) {
     },
-    onSuccess: function(event) {
-        console.log('hej');
-        console.log(event);
+    onSuccess: function(actionName, data, event) {
+        $(event.target).parent().parent().parent().parent().parent().remove();
+        toastr.success("File '"+ data.Data.File + "' has been deleted");
+    },
+    onError: function(actionName, data, event) {
+        
     }
 };
 
