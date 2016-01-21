@@ -27,6 +27,64 @@
   None
   
 
+**Source**
+----
+  Gets the information needed by Integration Manager used to monitor the different folders specified in the configuration file.
+
+* **URL**
+
+  /source
+
+* **Method:**
+
+  `GET`
+  
+*  **URL Params**
+
+  None
+
+* **Data Params**
+
+  None
+
+* **Success Response:**
+
+  * **Code:** 200 
+ 
+* **Error Response:**
+
+  None
+
+
+**Actions**
+----
+  Gets a list of all available actions the monitor agent has being used as part of the monitor views in Integration Manager.
+
+* **URL**
+
+  /source
+
+* **Method:**
+
+  `GET`
+  
+*  **URL Params**
+
+  None
+
+* **Data Params**
+
+  None
+
+* **Success Response:**
+
+  * **Code:** 200 
+ 
+* **Error Response:**
+
+  None
+
+
 **Files Details Newest**
 ----
   Returns a list of the files (warning and error files) order by date ascending (newest files). Max result is 30 files.
