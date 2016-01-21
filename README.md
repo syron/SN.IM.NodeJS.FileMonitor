@@ -23,8 +23,14 @@ Simply returns true.
 
 ### Files Details Newest
 ```
-/FilesDetailsNewest
+/FilesDetailsNewest?resourceName={resourceName}&applicationName={applicationName}&categoryName={categoryName}
 ```
+| Parameter | Type  | Description |
+|---|---|---|
+| resourceName  	| string  | The name of the resource.  |
+| applicationName  	| string  | The name of the application.  |
+| CategoryName  	| string  | The name of the category.  |
+
 Returns a list of the files (warning and error files) order by date ascending (newest files). Max result is 30 files.
 
 ### Files Details Oldest
