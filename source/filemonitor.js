@@ -605,7 +605,7 @@ router.get('/FileContent', function (req, res) {
     apiresult.Collection = collection;
     res.send(apiresult);
 });
-router.get('/FileSave', function (req, res) {
+router.post('/FileSave', function (req, res) {
     res.type("application/json");
     var resourceName = req.query.resourceName;
     var categoryName = req.query.categoryName;

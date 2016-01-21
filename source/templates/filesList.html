@@ -43,11 +43,11 @@ window.imActionsCallbacks["FileDelete"] = {
                     <ul class="dropdown-menu">
                         <li class="category text-left">FILE</li>
                         <li class="divider"></li>
-                        <li><a href="#" ng-click="action('FileContent', { Target: 'Modal', Confirm: { Enabled: true, Message: 'Are you sure to overwrite content in the active model?' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-file-code-o"></i> Render in Modal</a></li>
-                        <li><a href="#" ng-click="action('FileContent', { Target: 'Tab', Confirm: { Enabled: false, Message: '' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-external-link"></i> Render in new Tab</a></li>
-                        <li><a href="#" ng-click="action('FileDownload', { Target: 'Download', Confirm: { Enabled: false, Message: '' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-download"></i> Download</a></li>
-                        <li><a href="#" ng-click="action('FileEdit', { Target: 'Modal', Confirm: { Enabled: false, Message: '' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-pencil-square-o"></i> Edit</a></li>
-                        <li><a href="#" ng-click="action('FileDelete', { Target: 'None', Confirm: { Enabled: true, Message: 'Are you sure to delete file \'{{EncodedFullPath}}\'?' }, Method: 'GET',  Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-trash-o"></i> Delete</a></li>
+                        <li><a href="#" ng-click="action('FileContent', { Target: 'Modal', Confirm: { Enabled: true, Message: 'Are you sure to overwrite content in the active model?' }, Method: 'GET', SendDataInRequestBody: false, Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-file-code-o"></i> Render in Modal</a></li>
+                        <li><a href="#" ng-click="action('FileContent', { Target: 'Tab', Confirm: { Enabled: false, Message: '' }, Method: 'GET', SendDataInRequestBody: false, Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-external-link"></i> Render in new Tab</a></li>
+                        <li><a href="#" ng-click="action('FileDownload', { Target: 'Download', Confirm: { Enabled: false, Message: '' }, Method: 'GET', SendDataInRequestBody: false, Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-download"></i> Download</a></li>
+                        <li><a href="#" ng-click="action('FileEdit', { Target: 'Modal', Confirm: { Enabled: false, Message: '' }, Method: 'GET', SendDataInRequestBody: false, Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-pencil-square-o"></i> Edit</a></li>
+                        <li><a href="#" ng-click="action('FileDelete', { Target: 'None', Confirm: { Enabled: true, Message: 'Are you sure to delete file \'{{EncodedFullPath}}\'?' }, Method: 'GET', SendDataInRequestBody: false,  Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-trash-o"></i> Delete</a></li>
                     </ul>
                 </div>
             </td>

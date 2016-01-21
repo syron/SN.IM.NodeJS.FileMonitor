@@ -23,7 +23,7 @@ window.imActionsCallbacks["FileSave"] = {
     <title>{{FileName}}</title>
 </head>
 <body>
-    <form ng-submit="action('FileSave', { Target: 'None', Confirm: { Enabled: false, Message: '' }, Method: 'POST', Data: { File: '{{EncodedFullPath}}', Content: $('#fileEditContent').val() } }, $event)">
+    <form ng-submit="action('FileSave', { Target: 'None', Confirm: { Enabled: false, Message: '' }, Method: 'POST', SendDataInRequestBody: true, Data: { File: '{{EncodedFullPath}}', Content: $('#fileEditContent').val() } }, $event)">
         <div class="form-group">
             <label for="exampleInputEmail1">File Content</label>
             <textarea class="form-control" rows="20" id="fileEditContent">
