@@ -257,7 +257,6 @@ router.get('/FilesDetailsOldest', function(req, res) {
 	var template:Template = new Template();
 	template.data = new Array<any>(); 
 	template.data.push(loadFileContent("templates/filesList.html"));
-	template.data.push(loadFileContent("templates/filesList.js"));
 	
 	collection.Template = template;
 	
@@ -351,7 +350,6 @@ router.get('/FilesDetailsNewest', function(req, res) {
 	var template:Template = new Template();
 	template.data = new Array<any>(); 
 	template.data.push(loadFileContent("templates/filesList.html"));
-    template.data.push(loadFileContent("templates/filesList.js"));
 	
 	collection.Template = template;
 	
@@ -602,6 +600,99 @@ router.get('/FileContent', function(req, res) {
 	var template:Template = new Template();
 	template.data = new Array<any>(); 
 	template.data.push(loadFileContent("templates/fileContent.html"));
+	
+	collection.Template = template;
+	
+	apiresult.Collection = collection;
+	
+	res.send(apiresult);
+});
+
+router.get('/FileEdit', function(req, res) {
+	res.type("application/json");
+    
+	var resourceName: string = req.query.resourceName;
+	var categoryName: string = req.query.categoryName;
+	var applicationName: string = req.query.applicationName;
+    var fileFullPath: string = req.query.File;
+    
+    parseToJson();
+	
+	// get applicationId
+	var applicationId: number;
+	config.Applications.forEach(function(application) {
+		if (application.Name == applicationName) {
+			applicationId = application.ApplicationId;
+			return;
+		}
+	});
+    if (DEBUG)
+	   console.log("Application Id: "+ applicationId);
+       
+	// get categoryId
+	var categoryId: number;
+	config.Categories.forEach(function(category) {
+		if (category.Name == categoryName) {
+			categoryId = category.CategoryId;
+			return;
+		}
+	});
+	if (DEBUG) 
+        console.log("Category Id: "+ categoryId);
+    
+	// get path
+	var path: any;
+	config.Paths.forEach(function(tempPath) {
+		if (tempPath.ApplicationId == applicationId
+			&& tempPath.CategoryId == categoryId
+			&& tempPath.Name == resourceName)
+			path = tempPath;
+	});
+	if (DEBUG) 
+        console.log("Path: " + path);
+	
+    
+	var currentTime: Date = new Date();
+	
+	var files = monitor.readDirRecursively(<string>path.Path
+		, currentTime
+		, new TimeSpan(<string>path.WarningTimeInterval)
+		, new TimeSpan(<string>path.ErrorTimeInterval)
+		, StatusCode[<string>path.TimeEvaluationProperty]
+		, Boolean(<string>path.IncludeChildFolders)
+		, path.ExcludeChildFoldersList
+		, path.Filter);
+        
+    // loop through files to find fileName
+    var apiresult: ApiResult = new ApiResult();
+	
+	var collection: Collection = new Collection();
+	collection.Version = "1.0.0.0";
+	
+	var fullUrl= req.protocol + '://' + req.hostname  + ':'+ PORT + req.path;
+	collection.Href = fullUrl;
+	
+	// oldest files action
+	var fileContent: Item = new Item();
+	fileContent.Href = "";
+	fileContent.Links = null;
+	
+	var filecontent: any = null;
+    var fd: string = null;
+    files.forEach(function(file) {
+        if (file.FullPath == fileFullPath){ 
+            filecontent = fs.readFileSync(file.FullPath);
+            fd = filecontent.toString("utf8", 0, filecontent.length);
+        }
+    });  
+    
+	fileContent.Data = { FileName: fileFullPath, Content: fd };
+	
+	collection.Items.push(fileContent);
+	
+	var template:Template = new Template();
+	template.data = new Array<any>(); 
+	template.data.push(loadFileContent("templates/fileEdit.html"));
 	
 	collection.Template = template;
 	

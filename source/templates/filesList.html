@@ -1,19 +1,16 @@
-
 <script type="text/javascript">
-
 window.imActionsCallbacks = [];
 window.imActionsCallbacks["FileDelete"] = {
     init: function(actionName, data, event) {
     },
-    onSuccess: function(actionName, data, event) {
+    onSuccess: function(actionName, data, event, apiResult) {
         $(event.target).parent().parent().parent().parent().parent().remove();
-        toastr.success("File '"+ data.Data.File + "' has been deleted");
+        toastr.success("File '"+ data.Data.File + "' has been deleted.");
     },
-    onError: function(actionName, data, event) {
-        
+    onError: function(actionName, data, event, apiResult) {
+        console.log(apiResult);
     }
 };
-
 </script>
 
 {{#.}}
@@ -49,6 +46,7 @@ window.imActionsCallbacks["FileDelete"] = {
                         <li><a href="#" ng-click="action('FileContent', { Target: 'Modal', Confirm: { Enabled: true, Message: 'Are you sure to overwrite content in the active model?' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-file-code-o"></i> Render in Modal</a></li>
                         <li><a href="#" ng-click="action('FileContent', { Target: 'Tab', Confirm: { Enabled: false, Message: '' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-external-link"></i> Render in new Tab</a></li>
                         <li><a href="#" ng-click="action('FileDownload', { Target: 'Download', Confirm: { Enabled: false, Message: '' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-download"></i> Download</a></li>
+                        <li><a href="#" ng-click="action('FileEdit', { Target: 'Modal', Confirm: { Enabled: false, Message: '' }, Method: 'GET', Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-pencil-square-o"></i> Edit</a></li>
                         <li><a href="#" ng-click="action('FileDelete', { Target: 'None', Confirm: { Enabled: true, Message: 'Are you sure to delete file \'{{EncodedFullPath}}\'?' }, Method: 'GET',  Data: { File: '{{EncodedFullPath}}' } }, $event)"><i class="fa fa-trash-o"></i> Delete</a></li>
                     </ul>
                 </div>
