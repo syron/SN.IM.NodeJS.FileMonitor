@@ -2,42 +2,8 @@
 File Monitor for Integration Manager based on NodeJS
 
 ## API Calls
+See [API.md](API.md)
 
-### Actions
-```
-/actions
-```
-Gets a list of all available actions the monitor agent has.
-
-### Source
-```
-/source
-```
-Gets the information needed by Integration Manager used to monitor the different folders specified in the configuration file.
-
-### IsAlive
-```
-/isalive
-```
-Simply returns true.
-
-### Files Details Newest
-```
-/FilesDetailsNewest?resourceName={resourceName}&applicationName={applicationName}&categoryName={categoryName}
-```
-| Parameter | Type  | Description |
-|---|---|---|
-| resourceName  	| string  | The name of the resource.  |
-| applicationName  	| string  | The name of the application.  |
-| CategoryName  	| string  | The name of the category.  |
-
-Returns a list of the files (warning and error files) order by date ascending (newest files). Max result is 30 files.
-
-### Files Details Oldest
-```
-/FilesDetailsOldest
-```
-Returns a list of the files (warning and error files) order by date descending (oldest files). Max result is 30 files. 
 
 ## Build
 To build the file monitor solution run the following command in your command prompt.
