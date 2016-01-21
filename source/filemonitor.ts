@@ -361,6 +361,8 @@ router.get('/FilesDetailsNewest', function(req, res) {
 router.get('/FileDelete', function(req, res) {
 	res.type("application/octet-stream");
     
+    console.log("Delete request");
+    
 	var resourceName: string = req.query.resourceName;
 	var categoryName: string = req.query.categoryName;
 	var applicationName: string = req.query.applicationName;
@@ -434,7 +436,7 @@ router.get('/FileDelete', function(req, res) {
 	apiresult.Collection = collection;
     
     try {
-        fs.accessSync(path, fs.F_OK); 
+        fs.accessSync(fileToDelete, fs.F_OK); 
         fs.unlinkSync(fileToDelete);
         res.status(200).send(apiresult);  
     } catch (e) {
@@ -608,6 +610,22 @@ router.get('/FileContent', function(req, res) {
 	res.send(apiresult);
 });
 
+router.post('/FileSave', function(req, res) {
+    res.type("application/json");
+    
+	var resourceName: string = req.query.resourceName;
+	var categoryName: string = req.query.categoryName;
+	var applicationName: string = req.query.applicationName;
+    var fileFullPath: string = req.query.File;
+    var newFileContent: string = req.query.Content;
+    
+    console.log("FileEdit request");
+    console.log("File full path: " + fileFullPath);
+    console.log("New File Content: " + newFileContent);
+    
+    res.send(200);
+});
+
 router.get('/FileEdit', function(req, res) {
 	res.type("application/json");
     
@@ -615,7 +633,7 @@ router.get('/FileEdit', function(req, res) {
 	var categoryName: string = req.query.categoryName;
 	var applicationName: string = req.query.applicationName;
     var fileFullPath: string = req.query.File;
-    
+        
     parseToJson();
 	
 	// get applicationId

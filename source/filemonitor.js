@@ -154,6 +154,11 @@ var Template = (function () {
     }
     return Template;
 })();
+var ApiError = (function () {
+    function ApiError() {
+    }
+    return ApiError;
+})();
 var Collection = (function () {
     function Collection() {
         this.Items = new Array();
@@ -366,7 +371,6 @@ router.get('/FilesDetailsOldest', function (req, res) {
     var template = new Template();
     template.data = new Array();
     template.data.push(loadFileContent("templates/filesList.html"));
-    template.data.push(loadFileContent("templates/filesList.js"));
     collection.Template = template;
     apiresult.Collection = collection;
     res.send(apiresult);
@@ -427,13 +431,13 @@ router.get('/FilesDetailsNewest', function (req, res) {
     var template = new Template();
     template.data = new Array();
     template.data.push(loadFileContent("templates/filesList.html"));
-    template.data.push(loadFileContent("templates/filesList.js"));
     collection.Template = template;
     apiresult.Collection = collection;
     res.send(apiresult);
 });
 router.get('/FileDelete', function (req, res) {
     res.type("application/octet-stream");
+    console.log("Delete request");
     var resourceName = req.query.resourceName;
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
@@ -475,7 +479,6 @@ router.get('/FileDelete', function (req, res) {
             fileToDelete = file.FullPath;
         }
     });
-    fs.unlinkSync(fileToDelete);
     var apiresult = new ApiResult();
     var collection = new Collection();
     collection.Version = "1.0.0.0";
@@ -483,7 +486,18 @@ router.get('/FileDelete', function (req, res) {
     collection.Href = fullUrl;
     collection.Template = null;
     apiresult.Collection = collection;
-    res.status(200).send(apiresult);
+    try {
+        fs.accessSync(fileToDelete, fs.F_OK);
+        fs.unlinkSync(fileToDelete);
+        res.status(200).send(apiresult);
+    }
+    catch (e) {
+        collection.Error = new ApiError();
+        collection.Error.Code = "405",
+            collection.Error.Title = "File not found or/and not accessible for deletion.";
+        collection.Error.Message = "The requested file '" + fileFullPath + "' was not found or/and is not accessible for deletion. Please check if the file exists and/or if you have the proper access rights for deletion.";
+        res.status(405).send(apiresult);
+    }
 });
 router.get('/FileDownload', function (req, res) {
     res.type("application/octet-stream");
@@ -587,6 +601,79 @@ router.get('/FileContent', function (req, res) {
     var template = new Template();
     template.data = new Array();
     template.data.push(loadFileContent("templates/fileContent.html"));
+    collection.Template = template;
+    apiresult.Collection = collection;
+    res.send(apiresult);
+});
+router.get('/FileSave', function (req, res) {
+    res.type("application/json");
+    var resourceName = req.query.resourceName;
+    var categoryName = req.query.categoryName;
+    var applicationName = req.query.applicationName;
+    var fileFullPath = req.query.File;
+    var newFileContent = req.query.Content;
+    console.log("FileEdit request");
+    console.log("File full path: " + fileFullPath);
+    console.log("New File Content: " + newFileContent);
+    res.send(200);
+});
+router.get('/FileEdit', function (req, res) {
+    res.type("application/json");
+    var resourceName = req.query.resourceName;
+    var categoryName = req.query.categoryName;
+    var applicationName = req.query.applicationName;
+    var fileFullPath = req.query.File;
+    parseToJson();
+    var applicationId;
+    config.Applications.forEach(function (application) {
+        if (application.Name == applicationName) {
+            applicationId = application.ApplicationId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Application Id: " + applicationId);
+    var categoryId;
+    config.Categories.forEach(function (category) {
+        if (category.Name == categoryName) {
+            categoryId = category.CategoryId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Category Id: " + categoryId);
+    var path;
+    config.Paths.forEach(function (tempPath) {
+        if (tempPath.ApplicationId == applicationId
+            && tempPath.CategoryId == categoryId
+            && tempPath.Name == resourceName)
+            path = tempPath;
+    });
+    if (DEBUG)
+        console.log("Path: " + path);
+    var currentTime = new Date();
+    var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
+    var apiresult = new ApiResult();
+    var collection = new Collection();
+    collection.Version = "1.0.0.0";
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
+    collection.Href = fullUrl;
+    var fileContent = new Item();
+    fileContent.Href = "";
+    fileContent.Links = null;
+    var filecontent = null;
+    var fd = null;
+    files.forEach(function (file) {
+        if (file.FullPath == fileFullPath) {
+            filecontent = fs.readFileSync(file.FullPath);
+            fd = filecontent.toString("utf8", 0, filecontent.length);
+        }
+    });
+    fileContent.Data = { FileName: fileFullPath, Content: fd };
+    collection.Items.push(fileContent);
+    var template = new Template();
+    template.data = new Array();
+    template.data.push(loadFileContent("templates/fileEdit.html"));
     collection.Template = template;
     apiresult.Collection = collection;
     res.send(apiresult);

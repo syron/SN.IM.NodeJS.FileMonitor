@@ -5,10 +5,10 @@ window.imActionsCallbacks["FileDelete"] = {
     },
     onSuccess: function(actionName, data, event, apiResult) {
         $(event.target).parent().parent().parent().parent().parent().remove();
-        toastr.success("File '"+ data.Data.File + "' has been deleted.");
+        toastr.success("File '"+ data.Data.File + "' has been deleted.", "File deleted");
     },
     onError: function(actionName, data, event, apiResult) {
-        console.log(apiResult);
+        toastr.error(apiResult.Collection.Error.Message, "Error deleting file");
     }
 };
 </script>
