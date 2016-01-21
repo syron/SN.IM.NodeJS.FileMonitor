@@ -1,3 +1,32 @@
+**Is Alive**
+----
+  Simply returns true.
+
+* **URL**
+
+  /isalive
+
+* **Method:**
+
+  `GET`
+  
+*  **URL Params**
+
+  None
+
+* **Data Params**
+
+  None
+
+* **Success Response:**
+
+  * **Code:** 200 
+ 
+* **Error Response:**
+
+  None
+  
+
 **Files Details Newest**
 ----
   Returns a list of the files (warning and error files) order by date ascending (newest files). Max result is 30 files.
