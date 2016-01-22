@@ -5,7 +5,6 @@ window.imActionsCallbacks["FileSave"] = {
         data.Data.Content = $('#fileEditContent').val();
     },
     onSuccess: function(actionName, data, event, apiResult) {
-        $(event.target).parent().parent().parent().parent().parent().remove();
         toastr.success("File '"+ data.Data.File + "' has been saved.", "File saved");
     },
     onError: function(actionName, data, event, apiResult) {
@@ -25,12 +24,13 @@ window.imActionsCallbacks["FileSave"] = {
 <body>
     <form ng-submit="action('FileSave', { Target: 'None', Confirm: { Enabled: false, Message: '' }, Method: 'POST', SendDataInRequestBody: true, Data: { File: '{{EncodedFullPath}}', Content: '' } }, $event)">
         <div class="form-group">
-            <label for="exampleInputEmail1">File Content</label>
+            <label for="exampleInputEmail1">File Content of file: {{FullPath}}</label>
             <textarea class="form-control" rows="20" id="fileEditContent">
                 {{Content}}
             </textarea>
         </div>
-        <button type="submit" class="btn btn-default">Submit</button>
+        <button type="submit" class="btn btn-success pull-right"><i class="fa fa-check"></i> Save</button>
+        <div class="clearfix"></div>
     </form>
 </body>
 </html>
