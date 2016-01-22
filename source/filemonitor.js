@@ -212,6 +212,11 @@ var RequestStatus = (function () {
     }
     return RequestStatus;
 })();
+var PostStatus = (function () {
+    function PostStatus() {
+    }
+    return PostStatus;
+})();
 var settings = require("./settings.json");
 var DEFAULTCONFIGFILE = "config.json";
 var DEBUG = Boolean(settings.Debug);
@@ -658,14 +663,35 @@ router.post('/FileSave', function (req, res) {
             foundFile = file;
         }
     });
+    var apiresult = new ApiResult();
+    var collection = new Collection();
+    collection.Version = "1.0.0.0";
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
+    collection.Href = fullUrl;
+    var status = new PostStatus();
+    var result = new Item();
+    result.Data = status;
+    collection.Items.push(fileContent);
     if (foundFile != null) {
         try {
             fs.writeFileSync(foundFile.FullPath, req.body.Content, 'utf8');
+            status.Success = true;
+            status.Message = "Content has been saved to file '" + req.body.File + "'.";
         }
         catch (ex) {
-            console.log("error writing file...");
+            status.Success = false;
+            status.Message = "";
+            collection.Error = new ApiError();
+            collection.Error.Code = "AFS001";
+            collection.Error.Message = "Could not write file '" + req.body.File + "'.";
+            collection.Error.Title = "Error writing file";
         }
     }
+    var template = new Template();
+    template.data = new Array();
+    collection.Template = template;
+    apiresult.Collection = collection;
+    res.send(apiresult);
 });
 router.get('/FileEdit', function (req, res) {
     res.type("application/json");

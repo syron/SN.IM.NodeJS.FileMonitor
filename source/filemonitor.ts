@@ -16,6 +16,7 @@
 /// <reference path="models/ApiResult.ts" />
 /// <reference path="models/FilesDetails.ts" />
 /// <reference path="models/RequestStatus.ts" />
+/// <reference path="models/PostStatus.ts" />
 
 declare var process:any;
 declare function require(name:string);
@@ -703,10 +704,33 @@ router.post('/FileSave', function(req, res) {
 	var fullUrl= req.protocol + '://' + req.hostname  + ':'+ PORT + req.path;
 	collection.Href = fullUrl;
 	
+	var status: PostStatus = new PostStatus();
+    
+    var result: Item = new Item();
+    result.Data = status; 
+    collection.Items.push(fileContent);
+    
+    if (foundFile != null) {
+        // write content to file.
+        try {
+            fs.writeFileSync(foundFile.FullPath, req.body.Content, 'utf8');
+            
+            status.Success = true;
+            status.Message = "Content has been saved to file '" + req.body.File + "'."
+        }
+        catch (ex) {
+            status.Success = false;
+            status.Message = "";
+            
+            collection.Error = new ApiError();
+            collection.Error.Code = "AFS001";
+            collection.Error.Message = "Could not write file '" + req.body.File + "'.";
+            collection.Error.Title = "Error writing file";
+        }
+    }
+    
+    
 	// oldest files action
-	var fileContent: Item = new Item();
-		
-	collection.Items.push(fileContent);
 	
 	var template:Template = new Template();
 	template.data = new Array<any>(); 
@@ -714,20 +738,6 @@ router.post('/FileSave', function(req, res) {
 	collection.Template = template;
 	
 	apiresult.Collection = collection;
-	
-    if (foundFile != null) {
-        // write content to file.
-        try {
-            fs.writeFileSync(foundFile.FullPath, req.body.Content, 'utf8');
-        }
-        catch (ex) {
-            collection.Error = new ApiError();
-            collection.Error.Code = "AFS001";
-            collection.Error.Message = "Could not write file '" + req.body.File + "'.";
-            collection.Error.Title = "Error writing file";
-            console.log("error writing file...");
-        }
-    }
     
 	res.send(apiresult);
        
