@@ -222,6 +222,7 @@ var XAPIKEY = settings.Authentication.Key;
 if (DEBUG)
     console.log("Settings loaded. Debug=%s, Port=%s, BaseURI=%s, AuthenticationEnabled=%s, Key=%s", DEBUG, PORT, BASEURI, XAPIKEYENABLED, XAPIKEY);
 var express = require("express");
+var bodyParser = require("body-parser");
 var fs = require("fs");
 var os = require("os");
 var argv = require("minimist")(process.argv.slice(2));
@@ -229,6 +230,7 @@ var app = express();
 var router = express.Router();
 var configFile;
 var config;
+app.use(bodyParser.json());
 if (typeof argv.c == "string") {
     configFile = argv.c;
 }
@@ -257,10 +259,12 @@ var loadFileContent = function (filePath, encoding) {
 };
 var parseToJson = function () {
     try {
+        console.log(loadFileContent(configFile));
         config = JSON.parse(loadFileContent(configFile));
     }
     catch (ex) {
         console.log("Error loading configuration file '" + configFile + "'.");
+        console.log(ex);
         process.exit();
     }
 };
@@ -610,12 +614,58 @@ router.post('/FileSave', function (req, res) {
     var resourceName = req.query.resourceName;
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
-    var fileFullPath = req.query.File;
-    var newFileContent = req.query.Content;
-    console.log("FileEdit request");
-    console.log("File full path: " + fileFullPath);
-    console.log("New File Content: " + newFileContent);
-    res.send(200);
+    parseToJson();
+    var applicationId;
+    config.Applications.forEach(function (application) {
+        if (application.Name == applicationName) {
+            applicationId = application.ApplicationId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Application Id: " + applicationId);
+    var categoryId;
+    config.Categories.forEach(function (category) {
+        if (category.Name == categoryName) {
+            categoryId = category.CategoryId;
+            return;
+        }
+    });
+    if (DEBUG)
+        console.log("Category Id: " + categoryId);
+    var path;
+    config.Paths.forEach(function (tempPath) {
+        if (tempPath.ApplicationId == applicationId
+            && tempPath.CategoryId == categoryId
+            && tempPath.Name == resourceName)
+            path = tempPath;
+    });
+    if (DEBUG)
+        console.log("Path: " + path);
+    var currentTime = new Date();
+    var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
+    var apiresult = new ApiResult();
+    var collection = new Collection();
+    collection.Version = "1.0.0.0";
+    var fullUrl = req.protocol + '://' + req.hostname + ':' + PORT + req.path;
+    collection.Href = fullUrl;
+    var fileContent = new Item();
+    fileContent.Href = "";
+    fileContent.Links = null;
+    var foundFile = null;
+    files.forEach(function (file) {
+        if (file.FullPath == req.body.File) {
+            foundFile = file;
+        }
+    });
+    if (foundFile != null) {
+        try {
+            fs.writeFileSync(foundFile.FullPath, req.body.Content, 'utf8');
+        }
+        catch (ex) {
+            console.log("error writing file...");
+        }
+    }
 });
 router.get('/FileEdit', function (req, res) {
     res.type("application/json");
@@ -663,13 +713,15 @@ router.get('/FileEdit', function (req, res) {
     fileContent.Links = null;
     var filecontent = null;
     var fd = null;
+    var foundFile = null;
     files.forEach(function (file) {
         if (file.FullPath == fileFullPath) {
-            filecontent = fs.readFileSync(file.FullPath);
-            fd = filecontent.toString("utf8", 0, filecontent.length);
+            foundFile = file;
         }
     });
-    fileContent.Data = { FileName: fileFullPath, Content: fd };
+    filecontent = fs.readFileSync(foundFile.FullPath);
+    foundFile.Content = filecontent.toString("utf8", 0, filecontent.length);
+    fileContent.Data = foundFile;
     collection.Items.push(fileContent);
     var template = new Template();
     template.data = new Array();

@@ -32,6 +32,7 @@ var XAPIKEY: string = settings.Authentication.Key;
 if (DEBUG) console.log("Settings loaded. Debug=%s, Port=%s, BaseURI=%s, AuthenticationEnabled=%s, Key=%s", DEBUG, PORT, BASEURI, XAPIKEYENABLED, XAPIKEY);
 
 var express = require("express");
+var bodyParser = require("body-parser");
 var fs = require("fs");
 var os = require("os");
 var argv = require("minimist")(process.argv.slice(2));
@@ -39,6 +40,8 @@ var app: any = express();
 var router: any = express.Router();
 var configFile: string;
 var config: any;
+
+app.use(bodyParser.json());
 
 // parse config file from arguments, default: config.json
 if (typeof argv.c == "string") {
@@ -75,10 +78,13 @@ var loadFileContent = function(filePath: string, encoding: string = 'utf8') {
 var parseToJson = function() {
 	// load configuration
 	try {
+        
+        console.log(loadFileContent(configFile));
 		config = JSON.parse(loadFileContent(configFile));
 	}
 	catch (ex) {
 		console.log("Error loading configuration file '" + configFile + "'.");
+        console.log(ex);
 		process.exit();
 	}
 };
@@ -616,14 +622,115 @@ router.post('/FileSave', function(req, res) {
 	var resourceName: string = req.query.resourceName;
 	var categoryName: string = req.query.categoryName;
 	var applicationName: string = req.query.applicationName;
-    var fileFullPath: string = req.query.File;
-    var newFileContent: string = req.query.Content;
     
-    console.log("FileEdit request");
-    console.log("File full path: " + fileFullPath);
-    console.log("New File Content: " + newFileContent);
+    parseToJson();
     
-    res.send(200);
+    // get applicationId
+	var applicationId: number;
+	config.Applications.forEach(function(application) {
+		if (application.Name == applicationName) {
+			applicationId = application.ApplicationId;
+			return;
+		}
+	});
+    if (DEBUG)
+	   console.log("Application Id: "+ applicationId);
+       
+	// get categoryId
+	var categoryId: number;
+	config.Categories.forEach(function(category) {
+		if (category.Name == categoryName) {
+			categoryId = category.CategoryId;
+			return;
+		}
+	});
+	if (DEBUG) 
+        console.log("Category Id: "+ categoryId);
+    
+	// get path
+	var path: any;
+	config.Paths.forEach(function(tempPath) {
+		if (tempPath.ApplicationId == applicationId
+			&& tempPath.CategoryId == categoryId
+			&& tempPath.Name == resourceName)
+			path = tempPath;
+	});
+	if (DEBUG) 
+        console.log("Path: " + path);
+	
+    
+    
+    
+	var currentTime: Date = new Date();
+	
+	var files = monitor.readDirRecursively(<string>path.Path
+		, currentTime
+		, new TimeSpan(<string>path.WarningTimeInterval)
+		, new TimeSpan(<string>path.ErrorTimeInterval)
+		, StatusCode[<string>path.TimeEvaluationProperty]
+		, Boolean(<string>path.IncludeChildFolders)
+		, path.ExcludeChildFoldersList
+		, path.Filter);
+        
+    // loop through files to find fileName
+    var apiresult: ApiResult = new ApiResult();
+	
+	var collection: Collection = new Collection();
+	collection.Version = "1.0.0.0";
+	
+	var fullUrl= req.protocol + '://' + req.hostname  + ':'+ PORT + req.path;
+	collection.Href = fullUrl;
+	
+	// oldest files action
+	var fileContent: Item = new Item();
+	fileContent.Href = "";
+	fileContent.Links = null;
+	
+    var foundFile: FileInfo = null;
+    files.forEach(function(file) {
+        if (file.FullPath == req.body.File){
+            foundFile = file; 
+        }
+    });  
+    
+    
+    
+    var apiresult: ApiResult = new ApiResult();
+	
+	var collection: Collection = new Collection();
+	collection.Version = "1.0.0.0";
+	
+	var fullUrl= req.protocol + '://' + req.hostname  + ':'+ PORT + req.path;
+	collection.Href = fullUrl;
+	
+	// oldest files action
+	var fileContent: Item = new Item();
+		
+	collection.Items.push(fileContent);
+	
+	var template:Template = new Template();
+	template.data = new Array<any>(); 
+	
+	collection.Template = template;
+	
+	apiresult.Collection = collection;
+	
+    if (foundFile != null) {
+        // write content to file.
+        try {
+            fs.writeFileSync(foundFile.FullPath, req.body.Content, 'utf8');
+        }
+        catch (ex) {
+            collection.Error = new ApiError();
+            collection.Error.Code = "";
+            collection.Error.Message = "Could not write file '" + req.body.File + "'.";
+            collection.Error.Title = "Error writing file";
+            console.log("error writing file...");
+        }
+    }
+    
+	res.send(apiresult);
+       
 });
 
 router.get('/FileEdit', function(req, res) {
@@ -697,14 +804,17 @@ router.get('/FileEdit', function(req, res) {
 	
 	var filecontent: any = null;
     var fd: string = null;
+    var foundFile: FileInfo = null;
     files.forEach(function(file) {
-        if (file.FullPath == fileFullPath){ 
-            filecontent = fs.readFileSync(file.FullPath);
-            fd = filecontent.toString("utf8", 0, filecontent.length);
+        if (file.FullPath == fileFullPath){
+            foundFile = file; 
         }
     });  
     
-	fileContent.Data = { FileName: fileFullPath, Content: fd };
+    filecontent = fs.readFileSync(foundFile.FullPath);
+    foundFile.Content = filecontent.toString("utf8", 0, filecontent.length);
+    
+	fileContent.Data = foundFile;
 	
 	collection.Items.push(fileContent);
 	
@@ -787,6 +897,8 @@ router.get('/source', function(req, res) {
 
 
 app.use(BASEURI, router);
+
+
 
 var server = app.listen(PORT, function () {
 

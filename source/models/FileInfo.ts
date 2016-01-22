@@ -8,6 +8,7 @@ class FileInfo {
     public Status: string;
 	public Time: Date;
     public Size: string;    
+    public Content: string;
 	
 	public static compareFileInfoAsc = function (a: FileInfo,b: FileInfo): number {
 		if (a.Time < b.Time)

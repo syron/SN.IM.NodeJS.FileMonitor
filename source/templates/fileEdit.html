@@ -2,15 +2,15 @@
 window.imActionsCallbacks = [];
 window.imActionsCallbacks["FileSave"] = {
     init: function(actionName, data, event) {
-        console.log(data);
+        data.Data.Content = $('#fileEditContent').val();
     },
     onSuccess: function(actionName, data, event, apiResult) {
         $(event.target).parent().parent().parent().parent().parent().remove();
-        toastr.success("File '"+ data.Data.File + "' has been deleted.", "File deleted");
+        toastr.success("File '"+ data.Data.File + "' has been saved.", "File saved");
     },
     onError: function(actionName, data, event, apiResult) {
         console.log("error", data);
-        toastr.error(apiResult.Collection.Error.Message, "Error deleting file");
+        toastr.error(apiResult.Collection.Error.Message, "Error saving file");
     }
 };
 </script>
@@ -20,10 +20,10 @@ window.imActionsCallbacks["FileSave"] = {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{FileName}}</title>
+    <title>{{FullPath}}</title>
 </head>
 <body>
-    <form ng-submit="action('FileSave', { Target: 'None', Confirm: { Enabled: false, Message: '' }, Method: 'POST', SendDataInRequestBody: true, Data: { File: '{{EncodedFullPath}}', Content: $('#fileEditContent').val() } }, $event)">
+    <form ng-submit="action('FileSave', { Target: 'None', Confirm: { Enabled: false, Message: '' }, Method: 'POST', SendDataInRequestBody: true, Data: { File: '{{EncodedFullPath}}', Content: '' } }, $event)">
         <div class="form-group">
             <label for="exampleInputEmail1">File Content</label>
             <textarea class="form-control" rows="20" id="fileEditContent">
