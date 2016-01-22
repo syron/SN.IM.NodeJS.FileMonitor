@@ -722,7 +722,7 @@ router.post('/FileSave', function(req, res) {
         }
         catch (ex) {
             collection.Error = new ApiError();
-            collection.Error.Code = "";
+            collection.Error.Code = "AFS001";
             collection.Error.Message = "Could not write file '" + req.body.File + "'.";
             collection.Error.Title = "Error writing file";
             console.log("error writing file...");

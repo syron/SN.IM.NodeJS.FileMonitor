@@ -2,8 +2,10 @@
 File Monitor for Integration Manager based on NodeJS
 
 ## API Calls
-See [API.md](API.md)
+See [ERRORCODES.md](ERRORCODES.md)
 
+## Error Codes
+See [
 
 ## Build
 To build the file monitor solution run the following command in your command prompt.
