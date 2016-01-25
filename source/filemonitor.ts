@@ -464,9 +464,7 @@ router.get('/FileDownload', function(req, res) {
 	var categoryName: string = req.query.categoryName;
 	var applicationName: string = req.query.applicationName;
     var fileFullPath: string = req.query.identifier;
-    
-    console.log(fileFullPath);
-    
+        
     parseToJson();
 	
 	// get applicationId

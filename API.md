@@ -163,6 +163,40 @@
 
 **File Download**
 ----
+  Downloads a file.
+
+* **URL**
+
+  /FileDownload?resourceName=:resourceName&applicationName=:applicationName&categoryName=:categoryName&identifier:filename
+
+* **Method:**
+
+  `GET`
+  
+*  **URL Params**
+
+   **Required:**
+ 
+   `resourceName=[string]`<br />
+   `applicationName=[string]`<br />
+   `categoryName=[string]`<br />
+   `identifier=[string]`
+
+* **Data Params**
+
+  None
+
+* **Success Response:**
+
+  * **Code:** 200 
+ 
+* **Error Response:**
+
+  * **Code:** 404 NOT FOUND
+
+  OR
+
+  * **Code:** 405 METHOD NOT ALLOWED
 
 **FileEdit**
 ----
