@@ -192,7 +192,7 @@
  
 * **Error Response:**
 
-  * **Code:** 404 NOT FOUND
+  * **Code:** 400 Could not find file to download
 
   OR
 
