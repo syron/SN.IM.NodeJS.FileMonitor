@@ -192,11 +192,7 @@
  
 * **Error Response:**
 
-  * **Code:** 400 Could not find file to download
-
-  OR
-
-  * **Code:** 405 METHOD NOT ALLOWED
+  * **Code:** 400 Could not find file to download.
 
 **FileEdit**
 ----
