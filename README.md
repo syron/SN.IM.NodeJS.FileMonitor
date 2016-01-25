@@ -66,6 +66,7 @@ node filemonitor.js -c customConfigurationFile.json
 			"Name": "Out Folder",
 			"Description": ""
 		},
+        
 		{
 			"CategoryId": 3,
 			"Name": "Shared Folder",

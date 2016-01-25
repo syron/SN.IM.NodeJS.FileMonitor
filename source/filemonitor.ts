@@ -36,6 +36,8 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var fs = require("fs");
 var os = require("os");
+var path = require('path');
+var mime = require('mime');
 var argv = require("minimist")(process.argv.slice(2));
 var app: any = express();
 var router: any = express.Router();
@@ -458,12 +460,12 @@ router.get('/FileDelete', function(req, res) {
 
 /// Opens a specific file.
 router.get('/FileDownload', function(req, res) {
-	res.type("application/octet-stream");
-    
 	var resourceName: string = req.query.resourceName;
 	var categoryName: string = req.query.categoryName;
 	var applicationName: string = req.query.applicationName;
-    var fileFullPath: string = req.query.File;
+    var fileFullPath: string = req.query.identifier;
+    
+    console.log(fileFullPath);
     
     parseToJson();
 	
@@ -503,25 +505,44 @@ router.get('/FileDownload', function(req, res) {
     
 	var currentTime: Date = new Date();
 	
-	var files = monitor.readDirRecursively(<string>path.Path
-		, currentTime
-		, new TimeSpan(<string>path.WarningTimeInterval)
-		, new TimeSpan(<string>path.ErrorTimeInterval)
-		, StatusCode[<string>path.TimeEvaluationProperty]
-		, Boolean(<string>path.IncludeChildFolders)
-		, path.ExcludeChildFoldersList
-		, path.Filter);
+	// var files = monitor.readDirRecursively(<string>path.Path
+	// 	, currentTime
+	// 	, new TimeSpan(<string>path.WarningTimeInterval)
+	// 	, new TimeSpan(<string>path.ErrorTimeInterval)
+	// 	, StatusCode[<string>path.TimeEvaluationProperty]
+	// 	, Boolean(<string>path.IncludeChildFolders)
+	// 	, path.ExcludeChildFoldersList
+	// 	, path.Filter);
         
     // oldest files action
-    var fileToDownload: string = "";
-    var fd: string = null;
-    files.forEach(function(file) {
-        if (file.FullPath == fileFullPath){ 
-            fileToDownload = file.FullPath;
-        }
-    });  
+    // var fileToDownload: string = "";
+    // var fd: string = null;
+    // files.forEach(function(file) {
+    //     if (file.FullPath == fileFullPath){ 
+    //         fileToDownload = file.FullPath;
+    //     }
+    // });  
+    // 
+    // todo: file name in header...
+    // res.setHeader("FileName", "test.xml");
+    // res.setHeader("FileContentType", "text/xml");
     
-    res.status(200).sendFile(fileToDownload);
+    if (typeof fileFullPath !== "undefined" && fileFullPath != null && fileFullPath != "") {
+        var mimetype = mime.lookup(fileFullPath);
+        res.setHeader('Content-type', mimetype);
+        
+        
+        // split filename
+        var splittedFileName = fileFullPath.split("\\");
+        var filename = splittedFileName[splittedFileName.length - 1];
+        res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+        
+        var filestream = fs.createReadStream(fileFullPath);
+        filestream.pipe(res);
+    }
+    else {
+        res.send(400);
+    }
 });
 
 router.get('/FileContent', function(req, res) {

@@ -230,6 +230,8 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var fs = require("fs");
 var os = require("os");
+var path = require('path');
+var mime = require('mime');
 var argv = require("minimist")(process.argv.slice(2));
 var app = express();
 var router = express.Router();
@@ -509,11 +511,11 @@ router.get('/FileDelete', function (req, res) {
     }
 });
 router.get('/FileDownload', function (req, res) {
-    res.type("application/octet-stream");
     var resourceName = req.query.resourceName;
     var categoryName = req.query.categoryName;
     var applicationName = req.query.applicationName;
-    var fileFullPath = req.query.File;
+    var fileFullPath = req.query.identifier;
+    console.log(fileFullPath);
     parseToJson();
     var applicationId;
     config.Applications.forEach(function (application) {
@@ -543,15 +545,18 @@ router.get('/FileDownload', function (req, res) {
     if (DEBUG)
         console.log("Path: " + path);
     var currentTime = new Date();
-    var files = monitor.readDirRecursively(path.Path, currentTime, new TimeSpan(path.WarningTimeInterval), new TimeSpan(path.ErrorTimeInterval), StatusCode[path.TimeEvaluationProperty], Boolean(path.IncludeChildFolders), path.ExcludeChildFoldersList, path.Filter);
-    var fileToDownload = "";
-    var fd = null;
-    files.forEach(function (file) {
-        if (file.FullPath == fileFullPath) {
-            fileToDownload = file.FullPath;
-        }
-    });
-    res.status(200).sendFile(fileToDownload);
+    if (typeof fileFullPath !== "undefined" && fileFullPath != null && fileFullPath != "") {
+        var mimetype = mime.lookup(fileFullPath);
+        res.setHeader('Content-type', mimetype);
+        var splittedFileName = fileFullPath.split("\\");
+        var filename = splittedFileName[splittedFileName.length - 1];
+        res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+        var filestream = fs.createReadStream(fileFullPath);
+        filestream.pipe(res);
+    }
+    else {
+        res.send(400);
+    }
 });
 router.get('/FileContent', function (req, res) {
     res.type("application/octet-stream");
